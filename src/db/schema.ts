@@ -127,6 +127,22 @@ export const suggestionDecisions = pgTable(
   (table) => [primaryKey({ columns: [table.analysisId, table.suggestionIndex] })],
 ).enableRLS();
 
+// Hand edits on the CV preview, keyed by place in the layout (CvText.key in lib/export/document.ts).
+export const cvEdits = pgTable(
+  "cv_edits",
+  {
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => analyses.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    // The text the edit replaced: once the CV shows something else there, the edit no longer applies.
+    base: text("base").notNull(),
+    value: text("value").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.analysisId, table.key] })],
+).enableRLS();
+
 // The choice on analyses.result.summary_rewrite, one per analysis.
 export const summaryDecisions = pgTable("summary_decisions", {
   analysisId: uuid("analysis_id")

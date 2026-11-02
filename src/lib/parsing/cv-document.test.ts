@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import { buildCvDocument, pruneEmpty } from "@/lib/export/document";
+import { renderCvPdf } from "@/lib/export/pdf";
+import { reviseResume } from "@/lib/export/revise";
+import { makeAnalysis, makeResume } from "@/test/fixtures";
 import { CvFileRejected, readCvUpload } from "./cv-document";
 
 vi.mock("server-only", () => ({}));
@@ -12,9 +16,21 @@ async function rejection(file: File) {
 }
 
 describe("readCvUpload", () => {
-  it("sends a PDF to the model unchanged", async () => {
+  it("sends a PDF to the model unchanged, without a text layer when it has none", async () => {
     const upload = await readCvUpload(pdfFile(PDF));
-    expect(upload.document).toEqual({ kind: "pdf", base64: Buffer.from(PDF).toString("base64") });
+    expect(upload.document).toEqual({ kind: "pdf", base64: Buffer.from(PDF).toString("base64"), text: null });
+  });
+
+  it("extracts the exact text layer of a PDF", async () => {
+    const resume = makeResume({ detected_language: "vi", phone: "0912345678", full_name: "Trần Thị Ánh Tuyết" });
+    const revision = reviseResume(resume, makeAnalysis(), { bullets: {}, summary: null });
+    const pdf = await renderCvPdf(pruneEmpty(buildCvDocument(revision)));
+    const upload = await readCvUpload(new File([new Uint8Array(pdf)], "cv.pdf", { type: "application/pdf" }));
+
+    expect(upload.document.kind).toBe("pdf");
+    expect(upload.document.text).toContain("Trần Thị Ánh Tuyết");
+    expect(upload.document.text).toContain("0912345678");
+    expect(upload.document.text).toContain("Cut PostgreSQL query time by 40%");
   });
 
   it("drops bytes before a PDF header that starts late, as PDF readers allow", async () => {

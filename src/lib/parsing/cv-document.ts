@@ -1,9 +1,14 @@
 import "server-only";
 import mammoth from "mammoth";
+import { extractText, getDocumentProxy } from "unpdf";
 import { sha256Hex } from "@/lib/analysis/keys";
 
-/** A resume ready to send to the model: PDFs go as-is so layout and scans survive. */
-export type CvDocument = { kind: "pdf"; base64: string } | { kind: "text"; text: string };
+/**
+ * A resume ready to send to the model. PDFs go as-is so layout and scans survive,
+ * along with their own text layer: the exact characters, which the model would
+ * otherwise read off page images and sometimes get wrong.
+ */
+export type CvDocument = { kind: "pdf"; base64: string; text: string | null } | { kind: "text"; text: string };
 
 export const MAX_CV_BYTES = 5 * 1024 * 1024;
 
@@ -36,6 +41,29 @@ function pdfBytes(buffer: Buffer): Buffer {
   return buffer.subarray(start);
 }
 
+// A real text layer has hundreds of letters even on a short resume; scans have none or a few stray ones.
+const MIN_TEXT_LAYER_LETTERS = 150;
+const MAX_TEXT_LAYER_CHARS = 40_000;
+
+/** The PDF's text layer, or null for scans and layers too garbled to trust. */
+async function pdfTextLayer(buffer: Buffer): Promise<string | null> {
+  try {
+    // Copied, since pdf.js may detach the buffer it is given.
+    const extracted = await extractText(await getDocumentProxy(new Uint8Array(buffer)), { mergePages: true });
+    // Glyphs without a Unicode mapping (often ligatures like "ffi") come out as control characters;
+    // mark them so the model reads those letters off the page instead.
+    const text = extracted.text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "�");
+    const letters = text.match(/\p{L}/gu)?.length ?? 0;
+    const garbled = text.match(/[�-]/g)?.length ?? 0;
+    if (letters < MIN_TEXT_LAYER_LETTERS || garbled > letters * 0.05) return null;
+    return text.slice(0, MAX_TEXT_LAYER_CHARS);
+  } catch (error) {
+    // The model can still read the pages, just less accurately.
+    console.warn("[cv] PDF text layer extraction failed", error);
+    return null;
+  }
+}
+
 async function docxText(buffer: Buffer): Promise<string> {
   try {
     return (await mammoth.extractRawText({ buffer })).value;
@@ -60,7 +88,9 @@ export async function readCvUpload(file: File): Promise<CvUpload> {
   const raw = Buffer.from(await file.arrayBuffer());
   const buffer = kind === "pdf" ? pdfBytes(raw) : raw;
   const upload = { contentHash: sha256Hex(buffer), fileName: file.name };
-  if (kind === "pdf") return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64") } };
+  if (kind === "pdf") {
+    return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64"), text: await pdfTextLayer(buffer) } };
+  }
 
   const text = kind === "docx" ? await docxText(buffer) : buffer.toString("utf8");
   if (text.trim() === "") throw new CvFileRejected("empty_document");

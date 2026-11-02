@@ -10,21 +10,21 @@ const MUTED = "4B5563";
 
 function entryParagraphs(entry: CvEntry): Paragraph[] {
   const paragraphs: Paragraph[] = [];
-  if (entry.title || entry.dates) {
+  if (entry.title.text || entry.dates.text) {
     paragraphs.push(
       new Paragraph({
         keepNext: true,
         spacing: { before: 120 },
         tabStops: [{ type: TabStopType.RIGHT, position: CONTENT_WIDTH }],
         children: [
-          new TextRun({ text: entry.title ?? "", bold: true }),
-          ...(entry.dates ? [new TextRun({ children: [new Tab(), entry.dates], color: MUTED })] : []),
+          new TextRun({ text: entry.title.text, bold: true }),
+          ...(entry.dates.text ? [new TextRun({ children: [new Tab(), entry.dates.text], color: MUTED })] : []),
         ],
       }),
     );
   }
-  if (entry.subtitle) {
-    paragraphs.push(new Paragraph({ keepNext: true, children: [new TextRun({ text: entry.subtitle, italics: true })] }));
+  if (entry.subtitle.text) {
+    paragraphs.push(new Paragraph({ keepNext: true, children: [new TextRun({ text: entry.subtitle.text, italics: true })] }));
   }
   for (const paragraph of entry.paragraphs) {
     paragraphs.push(new Paragraph({ spacing: { before: 40 }, children: [new TextRun(paragraph.text)] }));
@@ -35,12 +35,15 @@ function entryParagraphs(entry: CvEntry): Paragraph[] {
   return paragraphs;
 }
 
+/** Renders a pruned document (see pruneEmpty). */
 export function renderCvDocx(doc: CvDocument): Promise<Buffer> {
   const centered = (run: TextRun, before = 0) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before }, children: [run] });
   const header = [
-    ...(doc.name ? [centered(new TextRun({ text: doc.name, bold: true, size: 36 }))] : []),
-    ...(doc.headline ? [centered(new TextRun({ text: doc.headline, size: 22 }), 40)] : []),
-    ...(doc.contact.length > 0 ? [centered(new TextRun({ text: doc.contact.join("  ·  "), size: 18, color: MUTED }), 80)] : []),
+    ...(doc.name.text ? [centered(new TextRun({ text: doc.name.text, bold: true, size: 36 }))] : []),
+    ...(doc.headline.text ? [centered(new TextRun({ text: doc.headline.text, size: 22 }), 40)] : []),
+    ...(doc.contact.length > 0
+      ? [centered(new TextRun({ text: doc.contact.map((c) => c.text).join("  ·  "), size: 18, color: MUTED }), 80)]
+      : []),
   ];
   const body = doc.sections.flatMap((section) => [
     new Paragraph({
@@ -54,7 +57,7 @@ export function renderCvDocx(doc: CvDocument): Promise<Buffer> {
 
   const document = new Document({
     creator: "OptimizeCV",
-    title: doc.name ? `CV - ${doc.name}` : "CV",
+    title: doc.name.text ? `CV - ${doc.name.text}` : "CV",
     styles: { default: { document: { run: { font: FONT, size: 20 } } } },
     sections: [
       {

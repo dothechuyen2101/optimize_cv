@@ -12,6 +12,8 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Đăng nhập email + mật khẩu (Supabase Auth): đăng ký, đăng nhập, quên/đặt lại mật khẩu, đăng xuất | Xong |
 | Lưu lịch sử, trang xem lại, lưu lựa chọn chấp nhận/bỏ qua/sửa gợi ý (cả bullet lẫn summary) | Xong |
 | Xuất CV đã chỉnh sửa: xem trước, tải PDF và DOCX theo mẫu ATS một cột | Xong |
+| Sửa tay mọi dòng của CV (tên, liên hệ, ngày tháng, bullet…) trên trang xem trước | Xong |
+| Đọc CV chính xác: dùng lớp text của PDF, đối chiếu từng trường, dùng model mạnh cho CV dạng ảnh | Xong |
 | Quota gói free: 3 lượt/tháng (UTC) | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
 | Phân tích role, review portfolio, luyện phỏng vấn chat/voice, thanh toán | Chưa làm (Phase 2–5) |
@@ -68,7 +70,11 @@ Host kết nối trực tiếp `db.<project>.supabase.co` chỉ có IPv6. Mạng
 
 Xong thì client chuyển sang `/[lang]/analyses/[id]`. Pipeline gồm:
 
-1. **Đọc CV và JD song song** bằng model hạng `fast`, trả về JSON có cấu trúc (structured outputs + Zod). PDF được gửi thẳng cho model để giữ bố cục và đọc được cả bản scan; DOCX được chuyển sang text bằng `mammoth`.
+1. **Đọc CV và JD song song** bằng model hạng `fast`, trả về JSON có cấu trúc (structured outputs + Zod). Nếu kết quả sai schema, step được gọi lại một lần. Cách đọc CV:
+   - PDF được gửi thẳng cho model để giữ bố cục, kèm **lớp text** của nó (trích bằng `unpdf`). Model chép ký tự từ lớp text thay vì đọc ảnh trang, vì đọc ảnh hay nhầm số kiểu `2018 → 2008`.
+   - Sau đó [ground.ts](src/lib/parsing/ground.ts) đối chiếu từng trường với text gốc. Trường nào không có nguyên văn trong text gốc thì được thay bằng đoạn gần giống nhất, nhưng chỉ khi đoạn đó gần như trùng khớp và là lựa chọn duy nhất.
+   - PDF không có lớp text (bản scan, xuất từ ảnh) được đọc bằng model hạng `strong` (step `parse_cv_scan`).
+   - DOCX được chuyển sang text bằng `mammoth`, rồi cũng được đối chiếu như trên.
 2. **Chấm ATS bằng code** (`src/lib/ats`): độ phủ kỹ năng bắt buộc, kỹ năng ưu tiên, từ khóa, số năm kinh nghiệm và lỗi định dạng theo thị trường. Bước này không gọi AI, nên kết quả ổn định và không tốn tiền. Phần so khớp bỏ dấu tiếng Việt và gộp các tên gọi khác nhau (ReactJS = React, Postgres = PostgreSQL…).
 3. **Phân tích và viết gợi ý** bằng model hạng `strong` (Claude Opus 5.5, effort `medium`): nhận định, điểm mạnh, khoảng trống, gợi ý từng bullet, summary mới, câu hỏi cần làm rõ. Prompt cấm bịa số liệu hay kỹ năng. Khi thiếu dữ liệu, AI để placeholder `[X%]` và hỏi lại người dùng.
 
@@ -82,7 +88,11 @@ Mọi lời gọi AI đi qua một client duy nhất là [src/lib/ai/client.ts](
 
 ### Xuất CV đã chỉnh sửa
 
-Người dùng chấp nhận, bỏ qua hoặc sửa lại từng gợi ý; app nhắc điền các chỗ trống kiểu `[X%]` trước khi xuất. Trang `/[lang]/analyses/[id]/cv` xem trước CV, còn `GET /api/analyses/[id]/cv?format=pdf|docx` tải file. Phần xuất không gọi AI:
+Người dùng chấp nhận, bỏ qua hoặc sửa lại từng gợi ý; app nhắc điền các chỗ trống kiểu `[X%]` trước khi xuất. Trang `/[lang]/analyses/[id]/cv` xem trước CV, và người dùng bấm vào bất kỳ dòng nào để sửa tay. Cơ chế lưu chỗ sửa:
+- Mỗi chỗ sửa nằm trong bảng `cv_edits`, gắn với khoá cố định của dòng đó (ví dụ `contact.phone`, `experience.0.b.2`) và lưu kèm text gốc lúc sửa.
+- Chỗ sửa chỉ được áp dụng khi dòng đó vẫn còn đúng text gốc. Vì vậy nếu người dùng đổi lựa chọn gợi ý sau đó, hành động mới nhất được ưu tiên.
+
+`GET /api/analyses/[id]/cv?format=pdf|docx` tải file đã áp dụng cả gợi ý lẫn chỗ sửa tay. Phần xuất không gọi AI:
 
 1. [revise.ts](src/lib/export/revise.ts) thay các dòng đã chấp nhận vào CV đã parse. Dòng gốc được tìm theo vị trí AI trả về; nếu không khớp thì tìm theo nội dung. Gợi ý không tìm thấy dòng gốc sẽ được báo lại, không bị chèn bừa.
 2. [document.ts](src/lib/export/document.ts) dựng bố cục chung, dùng tiêu đề mục theo ngôn ngữ của CV.

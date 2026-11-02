@@ -62,16 +62,32 @@ function rawOutput(response: Anthropic.Beta.BetaMessage, viaTool: boolean): unkn
   }
 }
 
-export async function runStructuredStep<Schema extends z.ZodType>({
-  step,
-  system,
-  content,
-  schema,
-}: StepRequest<Schema>): Promise<{ output: z.infer<Schema>; usage: UsageRecord }> {
+// Gateways don't enforce the schema, and a model occasionally ends a tool call early,
+// so an output that fails validation gets one more try.
+const MAX_ATTEMPTS = 2;
+
+function addUsage(earlier: UsageRecord, later: UsageRecord): UsageRecord {
+  return {
+    ...later,
+    inputTokens: earlier.inputTokens + later.inputTokens,
+    outputTokens: earlier.outputTokens + later.outputTokens,
+    cacheWriteTokens: earlier.cacheWriteTokens + later.cacheWriteTokens,
+    cacheReadTokens: earlier.cacheReadTokens + later.cacheReadTokens,
+    costUsd: earlier.costUsd + later.costUsd,
+    durationMs: earlier.durationMs + later.durationMs,
+    requestId: [earlier.requestId, later.requestId].filter(Boolean).join(",") || null,
+  };
+}
+
+async function requestOnce(
+  step: StepName,
+  system: string,
+  content: Anthropic.Beta.BetaContentBlockParam[],
+  jsonSchema: Record<string, unknown>,
+) {
   const config = STEP_CONFIG[step];
   const provider = getProvider();
   const model = provider.models[config.tier];
-  const jsonSchema = betaZodOutputFormat(schema).schema;
   const viaTool = !provider.structuredOutputs;
   const startedAt = Date.now();
 
@@ -127,17 +143,36 @@ export async function runStructuredStep<Schema extends z.ZodType>({
   };
   console.info("[ai_usage]", JSON.stringify(usage));
 
-  if (response.stop_reason === "refusal") {
-    throw new AIStepError(step, "refusal", response.stop_details?.explanation ?? "Request declined", usage);
+  return { response, usage, viaTool };
+}
+
+export async function runStructuredStep<Schema extends z.ZodType>({
+  step,
+  system,
+  content,
+  schema,
+}: StepRequest<Schema>): Promise<{ output: z.infer<Schema>; usage: UsageRecord }> {
+  const jsonSchema = betaZodOutputFormat(schema).schema;
+  let usage: UsageRecord | null = null;
+
+  for (let attempt = 1; ; attempt++) {
+    const call = await requestOnce(step, system, content, jsonSchema);
+    const { response, viaTool } = call;
+    usage = usage ? addUsage(usage, call.usage) : call.usage;
+
+    if (response.stop_reason === "refusal") {
+      throw new AIStepError(step, "refusal", response.stop_details?.explanation ?? "Request declined", usage);
+    }
+    if (response.stop_reason === "max_tokens") {
+      throw new AIStepError(step, "truncated", `Output exceeded ${STEP_CONFIG[step].maxTokens} tokens`, usage);
+    }
+    // Validate even on the structured-output path: a gateway may not enforce the schema.
+    const parsed = schema.safeParse(rawOutput(response, viaTool));
+    if (parsed.success) return { output: parsed.data, usage };
+    if (attempt === MAX_ATTEMPTS) {
+      const detail = parsed.error.message.slice(0, 500);
+      throw new AIStepError(step, "invalid_output", `Response did not match the schema: ${detail}`, usage);
+    }
+    console.warn(`[${step}] response did not match the schema; retrying`);
   }
-  if (response.stop_reason === "max_tokens") {
-    throw new AIStepError(step, "truncated", `Output exceeded ${config.maxTokens} tokens`, usage);
-  }
-  // Validate even on the structured-output path: a gateway may not enforce the schema.
-  const parsed = schema.safeParse(rawOutput(response, viaTool));
-  if (!parsed.success) {
-    const detail = parsed.error.message.slice(0, 500);
-    throw new AIStepError(step, "invalid_output", `Response did not match the schema: ${detail}`, usage);
-  }
-  return { output: parsed.data, usage };
 }

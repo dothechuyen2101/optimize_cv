@@ -229,11 +229,25 @@
     "back": "Quay lại kết quả phân tích",
     "downloadPdf": "Tải PDF",
     "downloadDocx": "Tải Word (DOCX)",
-    "applied": "Đã áp dụng {count} thay đổi, tô xanh trong bản xem trước. File tải về không có màu tô.",
+    "applied": "Đã áp dụng {count} gợi ý bạn chấp nhận.",
     "noChanges": "Bạn chưa chấp nhận gợi ý nào, nên nội dung dưới đây giữ nguyên như CV gốc.",
-    "unfilled": "Còn {count} dòng có chỗ trống như [X%] chưa điền (tô vàng). Hãy quay lại sửa trước khi tải.",
+    "unfilled": "Còn {count} dòng có chỗ trống như [X%] (tô vàng). Bấm vào dòng đó để điền số liệu thật trước khi tải.",
     "unplaced": "{count} gợi ý đã chấp nhận không tìm thấy dòng gốc trong CV nên chưa được áp dụng. Bạn có thể tự thêm vào bản Word.",
     "photoNote": "Bản xuất không có ảnh và ngày sinh. Nếu công ty bạn ứng tuyển yêu cầu, hãy thêm vào bản Word.",
-    "templateNote": "File tải về dùng mẫu mới, không giữ bố cục của CV gốc. Hãy đọc lại toàn bộ trước khi nộp."
+    "templateNote": "File tải về dùng mẫu mới, không giữ bố cục của CV gốc. Hãy đọc lại toàn bộ trước khi nộp.",
+    "editedCount": "Bạn đã tự sửa {count} chỗ.",
+    "editTip": "Bấm vào bất kỳ dòng nào, kể cả tên, số điện thoại và ngày tháng, để sửa; nhấn Enter để lưu. Xoá trắng một dòng để bỏ nó khỏi CV. Màu tô chỉ có ở bản xem trước: xanh lá là dòng sửa theo gợi ý, xanh dương là dòng bạn tự sửa, vàng là chỗ trống cần điền.",
+    "editField": "Sửa nội dung dòng này",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "restore": "Khôi phục bản gốc",
+    "removed": "Đã xoá dòng này. Bấm để khôi phục.",
+    "addName": "Thêm họ tên",
+    "addHeadline": "Thêm chức danh",
+    "addEmail": "Thêm email",
+    "addPhone": "Thêm số điện thoại",
+    "addLocation": "Thêm địa chỉ",
+    "saving": "Đang lưu…",
+    "saveFailed": "Chưa lưu được thay đổi gần nhất. Hãy kiểm tra kết nối rồi sửa lại."
   }
 }

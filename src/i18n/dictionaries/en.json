@@ -229,11 +229,25 @@
     "back": "Back to the analysis",
     "downloadPdf": "Download PDF",
     "downloadDocx": "Download Word (DOCX)",
-    "applied": "{count} changes applied, highlighted in green in the preview. Downloads have no highlighting.",
+    "applied": "{count} accepted suggestions applied.",
     "noChanges": "You haven't accepted any suggestions, so this matches your original resume.",
-    "unfilled": "{count} lines still have gaps like [X%] (highlighted in yellow). Go back and fill them before downloading.",
+    "unfilled": "{count} lines still have gaps like [X%] (highlighted in yellow). Click a line to fill in your real numbers before downloading.",
     "unplaced": "{count} accepted suggestions couldn't be matched to a line in your resume, so they weren't applied. You can add them in the Word file.",
     "photoNote": "The export has no photo or date of birth. If the employer asks for them, add them in the Word file.",
-    "templateNote": "The download uses a new layout, not your original design. Read it through before you apply."
+    "templateNote": "The download uses a new layout, not your original design. Read it through before you apply.",
+    "editedCount": "You edited {count} places yourself.",
+    "editTip": "Click any line, including your name, phone number and dates, to edit it; press Enter to save. Clear a line to leave it out. Highlighting appears only in this preview: green for suggestion rewrites, blue for your own edits, yellow for gaps to fill.",
+    "editField": "Edit this line",
+    "save": "Save",
+    "cancel": "Cancel",
+    "restore": "Restore original",
+    "removed": "Line removed. Click to restore it.",
+    "addName": "Add your name",
+    "addHeadline": "Add a headline",
+    "addEmail": "Add an email",
+    "addPhone": "Add a phone number",
+    "addLocation": "Add a location",
+    "saving": "Saving…",
+    "saveFailed": "Your last change wasn't saved. Check your connection and edit it again."
   }
 }

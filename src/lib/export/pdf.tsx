@@ -51,15 +51,15 @@ const styles = StyleSheet.create({
 function Entry({ entry }: { entry: CvEntry }) {
   return (
     <View style={styles.entry}>
-      {(entry.title || entry.dates || entry.subtitle) && (
+      {(entry.title.text || entry.dates.text || entry.subtitle.text) && (
         <View wrap={false}>
-          {(entry.title || entry.dates) && (
+          {(entry.title.text || entry.dates.text) && (
             <View style={styles.entryHead}>
-              <Text style={styles.title}>{entry.title}</Text>
-              {entry.dates && <Text style={styles.dates}>{entry.dates}</Text>}
+              <Text style={styles.title}>{entry.title.text}</Text>
+              {entry.dates.text && <Text style={styles.dates}>{entry.dates.text}</Text>}
             </View>
           )}
-          {entry.subtitle && <Text style={styles.subtitle}>{entry.subtitle}</Text>}
+          {entry.subtitle.text && <Text style={styles.subtitle}>{entry.subtitle.text}</Text>}
         </View>
       )}
       {entry.paragraphs.map((paragraph, index) => (
@@ -77,13 +77,14 @@ function Entry({ entry }: { entry: CvEntry }) {
   );
 }
 
+/** Renders a pruned document (see pruneEmpty). */
 export function renderCvPdf(doc: CvDocument): Promise<Buffer> {
   return renderToBuffer(
-    <Document title={doc.name ? `CV - ${doc.name}` : "CV"} author={doc.name ?? undefined} creator="OptimizeCV" language={doc.language}>
+    <Document title={doc.name.text ? `CV - ${doc.name.text}` : "CV"} author={doc.name.text || undefined} creator="OptimizeCV" language={doc.language}>
       <Page size="A4" style={styles.page}>
-        {doc.name && <Text style={styles.name}>{doc.name}</Text>}
-        {doc.headline && <Text style={styles.headline}>{doc.headline}</Text>}
-        {doc.contact.length > 0 && <Text style={styles.contact}>{doc.contact.join("  ·  ")}</Text>}
+        {doc.name.text && <Text style={styles.name}>{doc.name.text}</Text>}
+        {doc.headline.text && <Text style={styles.headline}>{doc.headline.text}</Text>}
+        {doc.contact.length > 0 && <Text style={styles.contact}>{doc.contact.map((c) => c.text).join("  ·  ")}</Text>}
         {doc.sections.map((section, index) => (
           <View key={index} style={styles.section}>
             <Text style={styles.heading} minPresenceAhead={40}>

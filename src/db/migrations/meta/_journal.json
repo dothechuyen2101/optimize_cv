@@ -22,6 +22,13 @@
       "when": 1793613336494,
       "tag": "0002_wet_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793615292220,
+      "tag": "0003_broad_dragon_man",
+      "breakpoints": true
     }
   ]
 }

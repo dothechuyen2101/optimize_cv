@@ -1,6 +1,6 @@
 import type { ModelTier } from "./providers";
 
-export type StepName = "parse_cv" | "parse_jd" | "analyze_match";
+export type StepName = "parse_cv" | "parse_cv_scan" | "parse_jd" | "analyze_match";
 
 export interface StepConfig {
   tier: ModelTier;
@@ -13,6 +13,8 @@ export interface StepConfig {
 // another tier only after comparing quality and cost on the eval set.
 export const STEP_CONFIG: Record<StepName, StepConfig> = {
   parse_cv: { tier: "fast", effort: "low", maxTokens: 12000 },
+  // PDFs without a text layer: the strong tier reads digits and diacritics off images far more reliably.
+  parse_cv_scan: { tier: "strong", effort: "medium", maxTokens: 12000 },
   parse_jd: { tier: "fast", effort: "low", maxTokens: 6000 },
   analyze_match: { tier: "strong", effort: "medium", maxTokens: 16000 },
 };

@@ -50,12 +50,6 @@ describe("reviseResume", () => {
     const revision = reviseResume(resume, analysis, choices({ 0: { decision: "accepted", text: "Cut latency by 35%" } }));
 
     expect(revision.resume.experiences[0].bullets[0]).toBe("Cut latency by 35%");
-    expect(revision.unfilled).toEqual([]);
-  });
-
-  it("reports rewrites that still contain a placeholder", () => {
-    const analysis = makeAnalysis({ bullet_suggestions: [suggestion({ proposed: "Cut latency by [X%]" })] });
-    expect(reviseResume(resume, analysis, choices({ 0: accepted })).unfilled).toEqual(["Cut latency by [X%]"]);
   });
 
   it("finds the line by its text when the model's indexes are off", () => {

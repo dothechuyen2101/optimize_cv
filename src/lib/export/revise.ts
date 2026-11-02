@@ -1,6 +1,6 @@
 import type { Analysis } from "@/lib/ai/schemas/analysis";
 import type { Resume } from "@/lib/ai/schemas/resume";
-import { findPlaceholders, type Choices } from "@/lib/analysis/types";
+import type { Choices } from "@/lib/analysis/types";
 
 type Section = "experience" | "project";
 
@@ -11,14 +11,13 @@ export interface Revision {
   changed: Set<string>;
   /** Accepted suggestions, by index, whose original line isn't in the resume. */
   unplaced: number[];
-  /** Rewritten lines that still contain a placeholder such as "[X%]". */
-  unfilled: string[];
 }
 
 export const SUMMARY_LINE = "summary";
 
+/** The key of a bullet in the CV document (see document.ts). */
 export function lineKey(section: Section, item: number, bullet: number): string {
-  return `${section}:${item}:${bullet}`;
+  return `${section === "experience" ? "experience" : "projects"}.${item}.b.${bullet}`;
 }
 
 function comparable(line: string): string {
@@ -48,12 +47,6 @@ export function reviseResume(resume: Resume, analysis: Analysis, choices: Choice
   const revised = structuredClone(resume);
   const changed = new Set<string>();
   const unplaced: number[] = [];
-  const unfilled: string[] = [];
-
-  function rewrite(key: string, text: string) {
-    changed.add(key);
-    if (findPlaceholders(text).length > 0) unfilled.push(text);
-  }
 
   analysis.bullet_suggestions.forEach((suggestion, index) => {
     const choice = choices.bullets[index];
@@ -69,13 +62,13 @@ export function reviseResume(resume: Resume, analysis: Analysis, choices: Choice
     const text = choice.text ?? suggestion.proposed;
     const items = suggestion.section === "experience" ? revised.experiences : revised.projects;
     items[spot.item].bullets[spot.bullet] = text;
-    rewrite(key, text);
+    changed.add(key);
   });
 
   if (choices.summary?.decision === "accepted") {
     revised.summary = choices.summary.text ?? analysis.summary_rewrite.proposed;
-    rewrite(SUMMARY_LINE, revised.summary);
+    changed.add(SUMMARY_LINE);
   }
 
-  return { resume: revised, changed, unplaced, unfilled };
+  return { resume: revised, changed, unplaced };
 }
