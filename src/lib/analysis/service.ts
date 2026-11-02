@@ -1,0 +1,308 @@
+import "server-only";
+import { and, count, desc, eq, gt, gte, or, sql, sum } from "drizzle-orm";
+import { getDb } from "@/db";
+import {
+  aiUsage,
+  analyses,
+  jobDescriptions,
+  profiles,
+  resumes,
+  resumeVersions,
+  suggestionDecisions,
+} from "@/db/schema";
+import type { Locale } from "@/i18n/config";
+import { PARSE_CV_PROMPT } from "@/lib/ai/prompts/parse-cv";
+import { PARSE_JD_PROMPT } from "@/lib/ai/prompts/parse-jd";
+import type { UsageRecord } from "@/lib/ai/run-step";
+import type { Job } from "@/lib/ai/schemas/job";
+import type { Resume } from "@/lib/ai/schemas/resume";
+import { parseCv } from "@/lib/ai/steps/parse-cv";
+import { parseJd } from "@/lib/ai/steps/parse-jd";
+import { PLAN_ANALYSIS_LIMITS, STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import type { CvUpload } from "@/lib/parsing/cv-document";
+import type { AnalysisOutcome, Stored } from "./run-analysis";
+import type { AnalysisReport, Decision } from "./types";
+
+// Every function takes the signed-in user's id and scopes its queries to it:
+// the database connection bypasses RLS.
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: string): boolean {
+  return UUID_PATTERN.test(value);
+}
+
+type Db = ReturnType<typeof getDb>;
+type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
+/** Runs that hold quota this month: completed, or still running and not stale. */
+async function quotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
+  const [profile] = await db.select({ plan: profiles.plan }).from(profiles).where(eq(profiles.id, userId));
+  const [{ used }] = await db
+    .select({ used: count() })
+    .from(analyses)
+    .where(
+      and(
+        eq(analyses.userId, userId),
+        gte(analyses.createdAt, quotaWindowStart(now)),
+        or(
+          eq(analyses.status, "completed"),
+          and(eq(analyses.status, "running"), gt(analyses.createdAt, new Date(now.getTime() - STALE_RUN_MS))),
+        ),
+      ),
+    );
+  return { used, limit: PLAN_ANALYSIS_LIMITS[profile?.plan ?? "free"] };
+}
+
+export function getQuota(userId: string): Promise<QuotaStatus> {
+  return quotaFor(getDb(), userId);
+}
+
+/** An earlier completed analysis with identical inputs, which can be shown without new AI calls. */
+export async function findCachedAnalysis(userId: string, cacheKey: string): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ id: analyses.id })
+    .from(analyses)
+    .where(and(eq(analyses.userId, userId), eq(analyses.cacheKey, cacheKey), eq(analyses.status, "completed")))
+    .orderBy(desc(analyses.createdAt))
+    .limit(1);
+  return row?.id ?? null;
+}
+
+/**
+ * Creates the analysis row in "running" state if the user has quota left. A
+ * per-user advisory lock makes the check and the insert atomic, so parallel
+ * requests can't overspend.
+ */
+export function reserveAnalysis(
+  userId: string,
+  run: { cacheKey: string; uiLocale: Locale; promptVersions: string[] },
+): Promise<{ id: string } | { quota: QuotaStatus }> {
+  return getDb().transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
+    await tx.insert(profiles).values({ id: userId }).onConflictDoNothing();
+    const quota = await quotaFor(tx, userId);
+    if (!hasQuotaLeft(quota)) return { quota };
+    const [row] = await tx
+      .insert(analyses)
+      .values({ userId, status: "running", ...run })
+      .returning({ id: analyses.id });
+    return { id: row.id };
+  });
+}
+
+export async function recordUsage(userId: string, analysisId: string, usage: UsageRecord): Promise<void> {
+  await getDb().insert(aiUsage).values({
+    userId,
+    analysisId,
+    step: usage.step,
+    provider: usage.provider,
+    model: usage.model,
+    requestId: usage.requestId,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    cacheWriteTokens: usage.cacheWriteTokens,
+    cacheReadTokens: usage.cacheReadTokens,
+    costUsd: usage.costUsd.toFixed(6),
+    durationMs: usage.durationMs,
+  });
+}
+
+/** Reuses this user's earlier parse of the same file, otherwise parses and stores it. */
+export async function loadOrParseResume(
+  userId: string,
+  upload: CvUpload,
+  onUsage: (usage: UsageRecord) => Promise<void>,
+): Promise<Stored<Resume>> {
+  const db = getDb();
+  const [existing] = await db
+    .select({ id: resumeVersions.id, parsed: resumeVersions.parsed })
+    .from(resumeVersions)
+    .innerJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
+    .where(
+      and(
+        eq(resumes.userId, userId),
+        eq(resumeVersions.contentHash, upload.contentHash),
+        eq(resumeVersions.promptVersion, PARSE_CV_PROMPT.version),
+      ),
+    )
+    .orderBy(desc(resumeVersions.createdAt))
+    .limit(1);
+  if (existing) return { id: existing.id, value: existing.parsed };
+
+  const { output, usage } = await parseCv(upload.document);
+  await onUsage(usage);
+  const id = await db.transaction(async (tx) => {
+    const [resume] = await tx
+      .insert(resumes)
+      .values({ userId, title: upload.fileName.slice(0, 200) })
+      .returning({ id: resumes.id });
+    const [version] = await tx
+      .insert(resumeVersions)
+      .values({
+        resumeId: resume.id,
+        version: 1,
+        source: "upload",
+        contentHash: upload.contentHash,
+        parsed: output,
+        promptVersion: PARSE_CV_PROMPT.version,
+      })
+      .returning({ id: resumeVersions.id });
+    return version.id;
+  });
+  return { id, value: output };
+}
+
+/** JDs are shared across users: one parse per distinct JD text and prompt version. */
+export async function loadOrParseJob(
+  jdText: string,
+  jdHash: string,
+  onUsage: (usage: UsageRecord) => Promise<void>,
+): Promise<Stored<Job>> {
+  const db = getDb();
+  const [existing] = await db
+    .select({ id: jobDescriptions.id, parsed: jobDescriptions.parsed, promptVersion: jobDescriptions.promptVersion })
+    .from(jobDescriptions)
+    .where(eq(jobDescriptions.contentHash, jdHash));
+  if (existing?.promptVersion === PARSE_JD_PROMPT.version) return { id: existing.id, value: existing.parsed };
+
+  const { output, usage } = await parseJd(jdText);
+  await onUsage(usage);
+  const values = { rawText: jdText, parsed: output, promptVersion: PARSE_JD_PROMPT.version };
+  const [row] = await db
+    .insert(jobDescriptions)
+    .values({ contentHash: jdHash, ...values })
+    .onConflictDoUpdate({ target: jobDescriptions.contentHash, set: values })
+    .returning({ id: jobDescriptions.id });
+  return { id: row.id, value: output };
+}
+
+export async function completeAnalysis(analysisId: string, outcome: AnalysisOutcome): Promise<void> {
+  await getDb()
+    .update(analyses)
+    .set({
+      status: "completed",
+      resumeVersionId: outcome.resumeVersionId,
+      jobDescriptionId: outcome.jobDescriptionId,
+      market: outcome.market,
+      ats: outcome.ats,
+      result: outcome.analysis,
+      completedAt: new Date(),
+    })
+    .where(eq(analyses.id, analysisId));
+}
+
+export async function failAnalysis(analysisId: string, errorCode: string): Promise<void> {
+  await getDb().update(analyses).set({ status: "failed", errorCode }).where(eq(analyses.id, analysisId));
+}
+
+export interface AnalysisListItem {
+  id: string;
+  status: (typeof analyses.$inferSelect)["status"];
+  createdAt: Date;
+  overall: number | null;
+  jobTitle: string | null;
+  company: string | null;
+  resumeTitle: string | null;
+}
+
+export async function listAnalyses(userId: string, limit = 50): Promise<AnalysisListItem[]> {
+  const rows = await getDb()
+    .select({
+      id: analyses.id,
+      status: analyses.status,
+      createdAt: analyses.createdAt,
+      ats: analyses.ats,
+      job: jobDescriptions.parsed,
+      resumeTitle: resumes.title,
+    })
+    .from(analyses)
+    .leftJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
+    .leftJoin(resumeVersions, eq(resumeVersions.id, analyses.resumeVersionId))
+    .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
+    .where(eq(analyses.userId, userId))
+    .orderBy(desc(analyses.createdAt))
+    .limit(limit);
+
+  return rows.map((row) => ({
+    id: row.id,
+    status: row.status,
+    createdAt: row.createdAt,
+    overall: row.ats?.overall ?? null,
+    jobTitle: row.job?.title ?? null,
+    company: row.job?.company ?? null,
+    resumeTitle: row.resumeTitle,
+  }));
+}
+
+export async function getAnalysisReport(
+  userId: string,
+  analysisId: string,
+): Promise<{ report: AnalysisReport; decisions: Record<number, Decision> } | null> {
+  if (!isUuid(analysisId)) return null;
+  const db = getDb();
+  const [row] = await db
+    .select({
+      id: analyses.id,
+      market: analyses.market,
+      ats: analyses.ats,
+      result: analyses.result,
+      resume: resumeVersions.parsed,
+      job: jobDescriptions.parsed,
+    })
+    .from(analyses)
+    .innerJoin(resumeVersions, eq(resumeVersions.id, analyses.resumeVersionId))
+    .innerJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
+    .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
+  if (!row?.ats || !row.result || !row.market) return null;
+
+  const [decisionRows, [cost]] = await Promise.all([
+    db
+      .select({ index: suggestionDecisions.suggestionIndex, decision: suggestionDecisions.decision })
+      .from(suggestionDecisions)
+      .where(eq(suggestionDecisions.analysisId, analysisId)),
+    db.select({ total: sum(aiUsage.costUsd) }).from(aiUsage).where(eq(aiUsage.analysisId, analysisId)),
+  ]);
+
+  return {
+    report: {
+      id: row.id,
+      resume: row.resume,
+      job: row.job,
+      market: row.market,
+      ats: row.ats,
+      analysis: row.result,
+      costUsd: Number(cost?.total ?? 0),
+    },
+    decisions: Object.fromEntries(decisionRows.map(({ index, decision }) => [index, decision])),
+  };
+}
+
+/** Saves or clears the user's choice on one suggestion of their own analysis. */
+export async function setDecision(
+  userId: string,
+  analysisId: string,
+  index: number,
+  decision: Decision | null,
+): Promise<void> {
+  if (!isUuid(analysisId) || !Number.isInteger(index) || index < 0) return;
+  const db = getDb();
+  const [owned] = await db
+    .select({ result: analyses.result })
+    .from(analyses)
+    .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId)));
+  if (!owned?.result || index >= owned.result.bullet_suggestions.length) return;
+
+  const key = and(eq(suggestionDecisions.analysisId, analysisId), eq(suggestionDecisions.suggestionIndex, index));
+  if (decision === null) {
+    await db.delete(suggestionDecisions).where(key);
+    return;
+  }
+  await db
+    .insert(suggestionDecisions)
+    .values({ analysisId, suggestionIndex: index, decision })
+    .onConflictDoUpdate({
+      target: [suggestionDecisions.analysisId, suggestionDecisions.suggestionIndex],
+      set: { decision, updatedAt: new Date() },
+    });
+}

@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "title": "OptimizeCV: from resume to interview invite",
+    "description": "AI reads your resume and the job description, scores your ATS match and suggests line-by-line edits that get you interviews."
+  },
+  "nav": {
+    "brand": "OptimizeCV",
+    "analyze": "Optimize resume",
+    "history": "History",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "switchTo": "Tiếng Việt"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Sign in to analyze your resume and see your history.",
+      "submit": "Sign in"
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "3 free analyses every month, no card required.",
+      "submit": "Create account"
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "submit": "Send reset link"
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password for your account.",
+      "submit": "Save new password"
+    },
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "passwordHint": "At least {min} characters",
+    "pending": "Working…",
+    "forgotLink": "Forgot password?",
+    "noAccount": "No account yet?",
+    "signupLink": "Sign up",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "notices": {
+      "check_email": "We sent a confirmation email to {email}. Open the link in it to activate your account, then sign in.",
+      "reset_sent": "If {email} has an account, a password reset link is on its way."
+    },
+    "errors": {
+      "invalid_input": "Invalid email or password.",
+      "invalid_credentials": "Wrong email or password.",
+      "email_not_confirmed": "Your email isn't confirmed yet. Open the link in the email we sent you.",
+      "weak_password": "Password is too weak; use at least 8 characters.",
+      "same_password": "The new password must differ from the old one.",
+      "rate_limited": "Too many attempts. Please try again in a few minutes.",
+      "email_send_failed": "We couldn't send an email to this address. Try again later or use another email.",
+      "link_invalid": "This link is invalid or has expired. Please try again.",
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "history": {
+    "title": "Analysis history",
+    "subtitle": "Your resume analyses, newest first.",
+    "quota": "This month you've used {used}/{limit} free analyses.",
+    "empty": "You haven't run any analyses yet.",
+    "start": "Run your first analysis",
+    "newAnalysis": "New analysis",
+    "score": "Score",
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "completed": "Done",
+      "failed": "Failed"
+    },
+    "untitledJob": "JD not parsed",
+    "back": "History"
+  },
+  "home": {
+    "eyebrow": "For candidates in Vietnam and worldwide",
+    "title": "Get your resume past the filters and into the interview",
+    "subtitle": "Upload your resume, paste the job description. AI scores the match the way an ATS reads it, shows the skills you're missing and rewrites each bullet without inventing experience.",
+    "cta": "Optimize my resume",
+    "ctaNote": "Works with Vietnamese and English resumes, PDF or DOCX",
+    "available": "Available",
+    "comingSoon": "Coming soon",
+    "features": {
+      "tailor": {
+        "title": "Tailor resume to a JD",
+        "body": "ATS score, missing skills and bullet-by-bullet edits aligned with the job you're applying for."
+      },
+      "role": {
+        "title": "Role analysis",
+        "body": "Decode the JD: must-haves, nice-to-haves, interview rounds and the questions you're likely to get."
+      },
+      "portfolio": {
+        "title": "Portfolio review",
+        "body": "Score your GitHub, website, Behance or PDF against the target role, with concrete improvements."
+      },
+      "interview": {
+        "title": "Interview practice",
+        "body": "Mock interviews by chat or by voice like a real call, scored after every session."
+      }
+    }
+  },
+  "analyze": {
+    "title": "Tailor your resume to a JD",
+    "subtitle": "Upload your resume and paste the job description. Analysis takes about 30–60 seconds.",
+    "cvLabel": "Your resume",
+    "cvDrop": "Drag and drop a file here, or click to choose",
+    "cvHint": "PDF, DOCX or TXT, up to 5 MB",
+    "cvSelected": "Selected: {name}",
+    "jdLabel": "Job description (JD)",
+    "jdPlaceholder": "Paste the full job description here…",
+    "jdHint": "At least {min} characters · currently {count}",
+    "marketLabel": "Target market",
+    "marketAuto": "Detect from the JD",
+    "marketVn": "Vietnam",
+    "marketIntl": "International",
+    "submit": "Analyze",
+    "submitting": "Analyzing…",
+    "quotaLeft": "{remaining}/{limit} free analyses left this month.",
+    "opening": "Opening the result…",
+    "progress": {
+      "parsing": "Reading your resume and the JD…",
+      "scoring": "Scoring ATS match…",
+      "analyzing": "AI is analyzing and writing suggestions…"
+    },
+    "errors": {
+      "missing_file": "Please choose a resume file.",
+      "file_type": "Only PDF, DOCX or TXT files are supported.",
+      "file_too_large": "The file is larger than 5 MB.",
+      "empty_document": "Couldn't read any text from the resume file.",
+      "jd_too_short": "The JD is too short. Paste the full description.",
+      "jd_too_long": "The JD is too long. Trim it to the main job description.",
+      "invalid_request": "Invalid request.",
+      "unauthorized": "Your session expired. Please sign in again.",
+      "quota_exceeded": "You've used all your free analyses for this month.",
+      "ai_auth": "AI is not configured (missing or invalid ANTHROPIC_API_KEY).",
+      "ai_rate_limited": "The service is busy. Please try again in a few minutes.",
+      "ai_refusal": "The AI couldn't process this content.",
+      "ai_truncated": "The result was cut off. Please try again.",
+      "ai_invalid_output": "The AI returned an invalid result. Please try again.",
+      "server": "Something went wrong. Please try again."
+    },
+    "result": {
+      "overall": "Match score",
+      "marketVn": "Vietnam conventions",
+      "marketIntl": "International conventions",
+      "breakdown": {
+        "required": "Required skills",
+        "preferred": "Preferred skills",
+        "keywords": "Keywords",
+        "experience": "Experience",
+        "format": "ATS formatting"
+      },
+      "notApplicable": "Not applicable",
+      "skillsTitle": "Skills and keywords",
+      "matched": "Matched",
+      "missing": "Missing",
+      "yearsRequired": "JD requires: {years}+ years",
+      "yearsCandidate": "Your resume: about {years} years",
+      "yearsUnknown": "Unknown",
+      "verdict": "Verdict",
+      "strengths": "Strengths",
+      "gaps": "Gaps against the JD",
+      "severity": {
+        "critical": "Critical",
+        "major": "Major",
+        "minor": "Minor"
+      },
+      "evidence": "In your resume",
+      "suggestions": "Line-by-line suggestions",
+      "section": {
+        "experience": "Experience",
+        "project": "Project"
+      },
+      "original": "Original",
+      "proposed": "Suggested",
+      "reason": "Why",
+      "keywordsAdded": "Keywords added",
+      "needsConfirmation": "Needs your confirmation",
+      "accept": "Accept",
+      "reject": "Skip",
+      "accepted": "Accepted",
+      "rejected": "Skipped",
+      "undo": "Undo",
+      "copy": "Copy",
+      "copied": "Copied",
+      "acceptedCount": "Accepted {count}/{total} suggestions",
+      "copyAccepted": "Copy accepted lines",
+      "summaryRewrite": "Summary rewrite",
+      "keywordsToAdd": "Keywords to add",
+      "onlyIfTrue": "only if true for you",
+      "questions": "The AI needs you to clarify",
+      "marketNotes": "Market-specific notes",
+      "formatIssues": "Formatting issues",
+      "noFormatIssues": "No formatting issues found.",
+      "formatIssue": {
+        "missing_email": "No contact email.",
+        "missing_phone": "No phone number.",
+        "missing_experience_section": "No experience or projects section.",
+        "missing_skills_section": "No dedicated skills section, so an ATS may miss your skills.",
+        "missing_education_section": "No education section.",
+        "missing_summary": "No summary at the top of the resume.",
+        "low_metrics": "Few bullets include measurable results (%, counts, revenue…).",
+        "long_bullets": "Many bullets are too long to skim.",
+        "too_long": "The resume is longer than the recommended 1–2 pages.",
+        "too_short": "The resume is too short to evaluate well.",
+        "photo_international": "The resume has a photo; many international markets (US, UK, Australia) advise removing it.",
+        "dob_international": "The resume shows a date of birth; international markets usually advise removing it."
+      },
+      "cost": "Estimated AI cost: {cost}",
+      "newAnalysis": "Analyze another resume",
+      "disclaimer": "These are AI suggestions. Only put on your resume what is true about your real experience."
+    }
+  }
+}

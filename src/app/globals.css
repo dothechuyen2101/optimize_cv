@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fb;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --subtle: #5b6478;
+  --line: #e3e7ef;
+  --primary: #4338ca;
+  --primary-fg: #ffffff;
+  --soft: #eef0fd;
+  --success: #047857;
+  --success-soft: #e6f6ef;
+  --warning: #b45309;
+  --warning-soft: #fdf3e2;
+  --danger: #b91c1c;
+  --danger-soft: #fcebeb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1020;
+    --foreground: #e5e9f2;
+    --card: #121931;
+    --subtle: #98a2b8;
+    --line: #232c47;
+    --primary: #8b93f8;
+    --primary-fg: #0b1020;
+    --soft: #1c2250;
+    --success: #34d399;
+    --success-soft: #0f2a22;
+    --warning: #fbbf24;
+    --warning-soft: #2e2410;
+    --danger: #f87171;
+    --danger-soft: #2f1517;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-soft: var(--soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

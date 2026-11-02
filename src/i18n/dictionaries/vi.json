@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "title": "OptimizeCV: từ CV đến lời mời phỏng vấn",
+    "description": "AI đọc CV và JD của bạn, chấm độ khớp ATS và gợi ý sửa từng dòng để bạn được gọi phỏng vấn."
+  },
+  "nav": {
+    "brand": "OptimizeCV",
+    "analyze": "Tối ưu CV",
+    "history": "Lịch sử",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "switchTo": "English"
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "subtitle": "Đăng nhập để phân tích CV và xem lại lịch sử.",
+      "submit": "Đăng nhập"
+    },
+    "signup": {
+      "title": "Tạo tài khoản",
+      "subtitle": "Miễn phí 3 lượt phân tích mỗi tháng, không cần thẻ thanh toán.",
+      "submit": "Tạo tài khoản"
+    },
+    "forgot": {
+      "title": "Quên mật khẩu",
+      "subtitle": "Nhập email của bạn, chúng tôi sẽ gửi link đặt lại mật khẩu.",
+      "submit": "Gửi link đặt lại"
+    },
+    "reset": {
+      "title": "Đặt mật khẩu mới",
+      "subtitle": "Chọn mật khẩu mới cho tài khoản của bạn.",
+      "submit": "Lưu mật khẩu mới"
+    },
+    "email": "Email",
+    "password": "Mật khẩu",
+    "newPassword": "Mật khẩu mới",
+    "passwordHint": "Tối thiểu {min} ký tự",
+    "pending": "Đang xử lý…",
+    "forgotLink": "Quên mật khẩu?",
+    "noAccount": "Chưa có tài khoản?",
+    "signupLink": "Đăng ký",
+    "haveAccount": "Đã có tài khoản?",
+    "loginLink": "Đăng nhập",
+    "notices": {
+      "check_email": "Đã gửi email xác nhận tới {email}. Mở link trong email để kích hoạt tài khoản rồi đăng nhập.",
+      "reset_sent": "Nếu {email} có tài khoản, link đặt lại mật khẩu đã được gửi tới hộp thư."
+    },
+    "errors": {
+      "invalid_input": "Email hoặc mật khẩu không hợp lệ.",
+      "invalid_credentials": "Sai email hoặc mật khẩu.",
+      "email_not_confirmed": "Email chưa được xác nhận. Hãy mở link trong email chúng tôi đã gửi.",
+      "weak_password": "Mật khẩu quá yếu, cần ít nhất 8 ký tự.",
+      "same_password": "Mật khẩu mới phải khác mật khẩu cũ.",
+      "rate_limited": "Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.",
+      "email_send_failed": "Không gửi được email tới địa chỉ này. Vui lòng thử lại sau hoặc dùng email khác.",
+      "link_invalid": "Link đã hết hạn hoặc không hợp lệ. Vui lòng thử lại.",
+      "unknown": "Có lỗi xảy ra, vui lòng thử lại."
+    }
+  },
+  "history": {
+    "title": "Lịch sử phân tích",
+    "subtitle": "Các lần phân tích CV của bạn, mới nhất ở trên.",
+    "quota": "Tháng này đã dùng {used}/{limit} lượt miễn phí.",
+    "empty": "Bạn chưa có lần phân tích nào.",
+    "start": "Phân tích CV đầu tiên",
+    "newAnalysis": "Phân tích mới",
+    "score": "Điểm",
+    "status": {
+      "pending": "Đang chờ",
+      "running": "Đang chạy",
+      "completed": "Hoàn tất",
+      "failed": "Lỗi"
+    },
+    "untitledJob": "JD chưa đọc được",
+    "back": "Lịch sử"
+  },
+  "home": {
+    "eyebrow": "Dành cho ứng viên Việt Nam và quốc tế",
+    "title": "Đưa CV của bạn qua vòng lọc, tới thẳng buổi phỏng vấn",
+    "subtitle": "Tải CV lên, dán JD. AI chấm độ khớp theo cách hệ thống ATS đọc CV, chỉ ra kỹ năng còn thiếu và viết lại từng bullet mà không bịa thêm kinh nghiệm.",
+    "cta": "Tối ưu CV ngay",
+    "ctaNote": "Hỗ trợ CV tiếng Việt và tiếng Anh, định dạng PDF hoặc DOCX",
+    "available": "Đã có",
+    "comingSoon": "Sắp ra mắt",
+    "features": {
+      "tailor": {
+        "title": "Tối ưu CV theo JD",
+        "body": "Điểm ATS, kỹ năng còn thiếu và gợi ý sửa từng bullet, bám sát JD bạn ứng tuyển."
+      },
+      "role": {
+        "title": "Phân tích role",
+        "body": "Giải mã JD: yêu cầu bắt buộc, điểm cộng, các vòng phỏng vấn và câu hỏi có thể gặp."
+      },
+      "portfolio": {
+        "title": "Review portfolio",
+        "body": "Chấm GitHub, website, Behance hoặc PDF theo role mục tiêu, kèm việc cần cải thiện."
+      },
+      "interview": {
+        "title": "Luyện phỏng vấn",
+        "body": "Phỏng vấn thử bằng chat hoặc giọng nói như gọi điện, có chấm điểm sau mỗi buổi."
+      }
+    }
+  },
+  "analyze": {
+    "title": "Tối ưu CV theo JD",
+    "subtitle": "Tải CV và dán mô tả công việc. Quá trình phân tích mất khoảng 30–60 giây.",
+    "cvLabel": "CV của bạn",
+    "cvDrop": "Kéo thả file vào đây hoặc bấm để chọn",
+    "cvHint": "PDF, DOCX hoặc TXT, tối đa 5 MB",
+    "cvSelected": "Đã chọn: {name}",
+    "jdLabel": "Mô tả công việc (JD)",
+    "jdPlaceholder": "Dán toàn bộ nội dung JD vào đây…",
+    "jdHint": "Tối thiểu {min} ký tự · hiện có {count}",
+    "marketLabel": "Thị trường mục tiêu",
+    "marketAuto": "Tự nhận diện theo JD",
+    "marketVn": "Việt Nam",
+    "marketIntl": "Quốc tế",
+    "submit": "Phân tích",
+    "submitting": "Đang phân tích…",
+    "quotaLeft": "Còn {remaining}/{limit} lượt phân tích miễn phí trong tháng này.",
+    "opening": "Đang mở kết quả…",
+    "progress": {
+      "parsing": "Đang đọc CV và JD…",
+      "scoring": "Đang chấm điểm ATS…",
+      "analyzing": "AI đang phân tích và viết gợi ý…"
+    },
+    "errors": {
+      "missing_file": "Vui lòng chọn file CV.",
+      "file_type": "Chỉ hỗ trợ file PDF, DOCX hoặc TXT.",
+      "file_too_large": "File vượt quá 5 MB.",
+      "empty_document": "Không đọc được nội dung từ file CV.",
+      "jd_too_short": "JD quá ngắn, hãy dán đầy đủ nội dung.",
+      "jd_too_long": "JD quá dài, hãy rút gọn còn phần mô tả công việc chính.",
+      "invalid_request": "Yêu cầu không hợp lệ.",
+      "unauthorized": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",
+      "quota_exceeded": "Bạn đã dùng hết lượt phân tích miễn phí của tháng này.",
+      "ai_auth": "AI chưa được cấu hình (thiếu hoặc sai ANTHROPIC_API_KEY).",
+      "ai_rate_limited": "Hệ thống đang quá tải, vui lòng thử lại sau ít phút.",
+      "ai_refusal": "AI không thể xử lý nội dung này.",
+      "ai_truncated": "Kết quả bị cắt ngang, vui lòng thử lại.",
+      "ai_invalid_output": "AI trả về kết quả không hợp lệ, vui lòng thử lại.",
+      "server": "Có lỗi xảy ra, vui lòng thử lại."
+    },
+    "result": {
+      "overall": "Điểm phù hợp",
+      "marketVn": "Chuẩn Việt Nam",
+      "marketIntl": "Chuẩn quốc tế",
+      "breakdown": {
+        "required": "Kỹ năng bắt buộc",
+        "preferred": "Kỹ năng ưu tiên",
+        "keywords": "Từ khóa",
+        "experience": "Kinh nghiệm",
+        "format": "Định dạng ATS"
+      },
+      "notApplicable": "Không áp dụng",
+      "skillsTitle": "Kỹ năng và từ khóa",
+      "matched": "Đã có",
+      "missing": "Còn thiếu",
+      "yearsRequired": "JD yêu cầu: {years}+ năm",
+      "yearsCandidate": "CV của bạn: khoảng {years} năm",
+      "yearsUnknown": "Không xác định",
+      "verdict": "Nhận định",
+      "strengths": "Điểm mạnh",
+      "gaps": "Khoảng trống so với JD",
+      "severity": {
+        "critical": "Nghiêm trọng",
+        "major": "Quan trọng",
+        "minor": "Nhỏ"
+      },
+      "evidence": "Trong CV",
+      "suggestions": "Gợi ý sửa từng dòng",
+      "section": {
+        "experience": "Kinh nghiệm",
+        "project": "Dự án"
+      },
+      "original": "Bản gốc",
+      "proposed": "Đề xuất",
+      "reason": "Lý do",
+      "keywordsAdded": "Từ khóa bổ sung",
+      "needsConfirmation": "Cần bạn xác nhận",
+      "accept": "Chấp nhận",
+      "reject": "Bỏ qua",
+      "accepted": "Đã chấp nhận",
+      "rejected": "Đã bỏ qua",
+      "undo": "Hoàn tác",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "acceptedCount": "Đã chấp nhận {count}/{total} gợi ý",
+      "copyAccepted": "Sao chép các dòng đã chấp nhận",
+      "summaryRewrite": "Viết lại phần tóm tắt",
+      "keywordsToAdd": "Từ khóa nên bổ sung",
+      "onlyIfTrue": "chỉ thêm nếu đúng với bạn",
+      "questions": "AI cần bạn làm rõ",
+      "marketNotes": "Lưu ý theo thị trường",
+      "formatIssues": "Vấn đề định dạng",
+      "noFormatIssues": "Không phát hiện vấn đề định dạng.",
+      "formatIssue": {
+        "missing_email": "Thiếu email liên hệ.",
+        "missing_phone": "Thiếu số điện thoại.",
+        "missing_experience_section": "Không có mục kinh nghiệm hoặc dự án.",
+        "missing_skills_section": "Không có mục kỹ năng riêng, ATS khó nhận diện kỹ năng của bạn.",
+        "missing_education_section": "Không có mục học vấn.",
+        "missing_summary": "Chưa có phần tóm tắt (summary) ở đầu CV.",
+        "low_metrics": "Ít bullet có số liệu đo lường được (%, số lượng, doanh thu…).",
+        "long_bullets": "Nhiều bullet quá dài, nhà tuyển dụng khó đọc lướt.",
+        "too_long": "CV quá dài so với khuyến nghị 1–2 trang.",
+        "too_short": "CV quá ngắn, chưa đủ thông tin để đánh giá.",
+        "photo_international": "CV có ảnh, nhiều thị trường quốc tế (Mỹ, Anh, Úc) khuyến nghị bỏ ảnh.",
+        "dob_international": "CV có ngày sinh, thị trường quốc tế thường khuyến nghị bỏ thông tin này."
+      },
+      "cost": "Chi phí AI ước tính: {cost}",
+      "newAnalysis": "Phân tích CV khác",
+      "disclaimer": "Đây là gợi ý từ AI. Chỉ đưa vào CV những gì đúng với kinh nghiệm thật của bạn."
+    }
+  }
+}
