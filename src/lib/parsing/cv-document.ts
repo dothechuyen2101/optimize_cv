@@ -26,6 +26,16 @@ function kindOf(file: File): "pdf" | "docx" | "txt" | null {
   return null;
 }
 
+/** PDF readers accept a header anywhere in the first 1024 bytes, so some real files start with junk. */
+const PDF_HEADER_WINDOW = 1024;
+
+function pdfBytes(buffer: Buffer): Buffer {
+  const start = buffer.subarray(0, PDF_HEADER_WINDOW).indexOf("%PDF-", 0, "latin1");
+  if (start === -1) throw new CvFileRejected("file_type");
+  // Such files count xref offsets from the header, so cutting the prefix leaves a well-formed PDF.
+  return buffer.subarray(start);
+}
+
 async function docxText(buffer: Buffer): Promise<string> {
   try {
     return (await mammoth.extractRawText({ buffer })).value;
@@ -47,12 +57,10 @@ export async function readCvUpload(file: File): Promise<CvUpload> {
   if (!kind) throw new CvFileRejected("file_type");
   if (file.size > MAX_CV_BYTES) throw new CvFileRejected("file_too_large");
 
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const raw = Buffer.from(await file.arrayBuffer());
+  const buffer = kind === "pdf" ? pdfBytes(raw) : raw;
   const upload = { contentHash: sha256Hex(buffer), fileName: file.name };
-  if (kind === "pdf") {
-    if (buffer.subarray(0, 5).toString("latin1") !== "%PDF-") throw new CvFileRejected("file_type");
-    return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64") } };
-  }
+  if (kind === "pdf") return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64") } };
 
   const text = kind === "docx" ? await docxText(buffer) : buffer.toString("utf8");
   if (text.trim() === "") throw new CvFileRejected("empty_document");
