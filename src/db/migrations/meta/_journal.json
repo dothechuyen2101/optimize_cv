@@ -15,6 +15,13 @@
       "when": 1793591589405,
       "tag": "0001_cynical_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793613336494,
+      "tag": "0002_wet_rawhide_kid",
+      "breakpoints": true
     }
   ]
 }

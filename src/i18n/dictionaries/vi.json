@@ -211,7 +211,29 @@
       },
       "cost": "Chi phí AI ước tính: {cost}",
       "newAnalysis": "Phân tích CV khác",
-      "disclaimer": "Đây là gợi ý từ AI. Chỉ đưa vào CV những gì đúng với kinh nghiệm thật của bạn."
+      "disclaimer": "Đây là gợi ý từ AI. Chỉ đưa vào CV những gì đúng với kinh nghiệm thật của bạn.",
+      "edited": "đã sửa",
+      "edit": "Sửa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "fillPlaceholders": "Điền {placeholders} bằng số liệu thật của bạn trước khi xuất CV.",
+      "exportTitle": "Xuất CV đã chỉnh sửa",
+      "exportBody": "Ghép {count} thay đổi bạn đã chấp nhận vào CV, xem trước rồi tải về dạng PDF hoặc Word.",
+      "exportEmpty": "Chấp nhận các gợi ý ở trên, rồi xem trước và tải CV đã sửa dạng PDF hoặc Word.",
+      "exportCta": "Xem và tải CV"
     }
+  },
+  "cv": {
+    "title": "CV đã chỉnh sửa",
+    "subtitle": "CV gốc của bạn với các gợi ý đã chấp nhận, trình bày theo mẫu một cột thân thiện với ATS.",
+    "back": "Quay lại kết quả phân tích",
+    "downloadPdf": "Tải PDF",
+    "downloadDocx": "Tải Word (DOCX)",
+    "applied": "Đã áp dụng {count} thay đổi, tô xanh trong bản xem trước. File tải về không có màu tô.",
+    "noChanges": "Bạn chưa chấp nhận gợi ý nào, nên nội dung dưới đây giữ nguyên như CV gốc.",
+    "unfilled": "Còn {count} dòng có chỗ trống như [X%] chưa điền (tô vàng). Hãy quay lại sửa trước khi tải.",
+    "unplaced": "{count} gợi ý đã chấp nhận không tìm thấy dòng gốc trong CV nên chưa được áp dụng. Bạn có thể tự thêm vào bản Word.",
+    "photoNote": "Bản xuất không có ảnh và ngày sinh. Nếu công ty bạn ứng tuyển yêu cầu, hãy thêm vào bản Word.",
+    "templateNote": "File tải về dùng mẫu mới, không giữ bố cục của CV gốc. Hãy đọc lại toàn bộ trước khi nộp."
   }
 }

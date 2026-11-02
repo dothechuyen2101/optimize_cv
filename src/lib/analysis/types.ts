@@ -19,6 +19,34 @@ export interface AnalysisReport {
 
 export type Decision = "accepted" | "rejected";
 
+/** The user's call on one suggestion; `text` is their own wording of it, null to keep the AI's. */
+export interface Choice {
+  decision: Decision;
+  text: string | null;
+}
+
+export interface Choices {
+  /** Keyed by position in analysis.bullet_suggestions. */
+  bullets: Record<number, Choice>;
+  summary: Choice | null;
+}
+
+export type SuggestionTarget = { kind: "bullet"; index: number } | { kind: "summary" };
+
+export const MAX_SUGGESTION_TEXT = 2000;
+
+/** Square-bracket gaps such as "[X%]" that the AI leaves for the user to fill. */
+const PLACEHOLDER = /\[[^[\]\n]{1,40}\]/;
+
+export function findPlaceholders(text: string): string[] {
+  return text.match(new RegExp(PLACEHOLDER, "g")) ?? [];
+}
+
+/** Splits text so that its placeholders land at the odd indexes. */
+export function splitPlaceholders(text: string): string[] {
+  return text.split(new RegExp(`(${PLACEHOLDER.source})`));
+}
+
 export type AnalysisErrorCode =
   | "missing_file"
   | "file_type"

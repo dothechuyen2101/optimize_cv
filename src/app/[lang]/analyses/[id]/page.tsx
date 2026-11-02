@@ -23,7 +23,7 @@ async function AnalysisDetail({ params }: { params: PageProps<"/[lang]/analyses/
         ← {history.back}
       </Link>
       <div className="mt-4">
-        <SavedAnalysis report={found.report} decisions={found.decisions} locale={locale} dict={analyze} />
+        <SavedAnalysis report={found.report} choices={found.choices} locale={locale} dict={analyze} />
       </div>
     </>
   );

@@ -6,7 +6,7 @@ import { format } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import type { BulletSuggestion } from "@/lib/ai/schemas/analysis";
 import type { Resume } from "@/lib/ai/schemas/resume";
-import type { AnalysisReport, Decision } from "@/lib/analysis/types";
+import type { AnalysisReport, Choice, Choices, SuggestionTarget } from "@/lib/analysis/types";
 import { COMPONENT_WEIGHTS, type AtsComponentKey, type TermCoverage } from "@/lib/ats/score";
 import { CopyButton } from "./copy-button";
 import { ScoreRing, scoreTone } from "./score-ring";
@@ -90,32 +90,48 @@ function List({ items }: { items: string[] }) {
   );
 }
 
+const NO_CHOICES: Choices = { bullets: {}, summary: null };
+
 interface Props {
   report: AnalysisReport;
   dict: Dictionary["analyze"];
   newAnalysisHref: string;
-  initialDecisions?: Record<number, Decision>;
-  /** Called after each accept/skip/undo so the choice can be saved. */
-  onDecisionChange?: (index: number, decision: Decision | null) => void;
+  /** Page that previews and downloads the resume with the accepted suggestions. */
+  exportHref: string;
+  initialChoices?: Choices;
+  /** Called after each accept/skip/edit/undo so the choice can be saved. */
+  onChoiceChange?: (target: SuggestionTarget, choice: Choice | null) => void;
 }
 
-export function AnalysisResult({ report, dict: analyzeDict, newAnalysisHref, initialDecisions = {}, onDecisionChange }: Props) {
+export function AnalysisResult({
+  report,
+  dict: analyzeDict,
+  newAnalysisHref,
+  exportHref,
+  initialChoices = NO_CHOICES,
+  onChoiceChange,
+}: Props) {
   const dict = analyzeDict.result;
   const { ats, analysis, resume, job } = report;
-  const [decisions, setDecisions] = useState<Record<number, Decision>>(initialDecisions);
+  const [choices, setChoices] = useState<Choices>(initialChoices);
 
   const suggestions = analysis.bullet_suggestions;
-  const accepted = suggestions.filter((_, index) => decisions[index] === "accepted");
-  const acceptedText = accepted.map((suggestion) => `• ${suggestion.proposed}`).join("\n");
+  const acceptedLines = suggestions.flatMap((suggestion, index) => {
+    const choice = choices.bullets[index];
+    return choice?.decision === "accepted" ? [choice.text ?? suggestion.proposed] : [];
+  });
+  const acceptedText = acceptedLines.map((line) => `• ${line}`).join("\n");
+  const changeCount = acceptedLines.length + (choices.summary?.decision === "accepted" ? 1 : 0);
 
-  function decide(index: number, decision: Decision | undefined) {
-    setDecisions((current) => {
-      const next = { ...current };
-      if (decision) next[index] = decision;
-      else delete next[index];
-      return next;
+  function choose(target: SuggestionTarget, choice: Choice | null) {
+    setChoices((current) => {
+      if (target.kind === "summary") return { ...current, summary: choice };
+      const bullets = { ...current.bullets };
+      if (choice) bullets[target.index] = choice;
+      else delete bullets[target.index];
+      return { ...current, bullets };
     });
-    onDecisionChange?.(index, decision ?? null);
+    onChoiceChange?.(target, choice);
   }
 
   return (
@@ -207,8 +223,8 @@ export function AnalysisResult({ report, dict: analyzeDict, newAnalysisHref, ini
           title={dict.suggestions}
           aside={
             <div className="flex flex-wrap items-center gap-3 text-sm text-subtle">
-              <span>{format(dict.acceptedCount, { count: accepted.length, total: suggestions.length })}</span>
-              {accepted.length > 0 && (
+              <span>{format(dict.acceptedCount, { count: acceptedLines.length, total: suggestions.length })}</span>
+              {acceptedLines.length > 0 && (
                 <CopyButton text={acceptedText} label={dict.copyAccepted} copiedLabel={dict.copied} />
               )}
             </div>
@@ -216,31 +232,43 @@ export function AnalysisResult({ report, dict: analyzeDict, newAnalysisHref, ini
         >
           <ol className="grid gap-4">
             {suggestions.map((suggestion, index) => (
-              <SuggestionCard
-                key={`${suggestion.section}-${suggestion.item_index}-${suggestion.bullet_index}-${index}`}
-                suggestion={suggestion}
-                context={suggestionContext(suggestion, resume, dict)}
-                decision={decisions[index]}
-                onDecide={(decision) => decide(index, decision)}
-                dict={dict}
-              />
+              <li key={`${suggestion.section}-${suggestion.item_index}-${suggestion.bullet_index}-${index}`}>
+                <SuggestionCard
+                  suggestion={suggestion}
+                  context={suggestionContext(suggestion, resume, dict)}
+                  choice={choices.bullets[index] ?? null}
+                  onChoose={(choice) => choose({ kind: "bullet", index }, choice)}
+                  dict={dict}
+                />
+              </li>
             ))}
           </ol>
         </Card>
       )}
 
-      <Card
-        title={dict.summaryRewrite}
-        aside={<CopyButton text={analysis.summary_rewrite.proposed} label={dict.copy} copiedLabel={dict.copied} />}
-      >
-        <div className="grid gap-3 text-sm">
-          {analysis.summary_rewrite.original && (
-            <p className="text-subtle line-through decoration-line">{analysis.summary_rewrite.original}</p>
-          )}
-          <p className="rounded-lg bg-soft px-3 py-2 font-medium leading-relaxed">{analysis.summary_rewrite.proposed}</p>
-          <p className="leading-relaxed text-subtle">{analysis.summary_rewrite.reason}</p>
-        </div>
+      <Card title={dict.summaryRewrite}>
+        <SuggestionCard
+          suggestion={analysis.summary_rewrite}
+          choice={choices.summary}
+          onChoose={(choice) => choose({ kind: "summary" }, choice)}
+          dict={dict}
+        />
       </Card>
+
+      <section className="flex flex-col gap-4 rounded-xl border border-primary bg-soft p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="grid gap-1">
+          <h2 className="text-lg font-semibold">{dict.exportTitle}</h2>
+          <p className="text-sm text-subtle">
+            {changeCount > 0 ? format(dict.exportBody, { count: changeCount }) : dict.exportEmpty}
+          </p>
+        </div>
+        <Link
+          href={exportHref}
+          className="shrink-0 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-fg hover:opacity-90"
+        >
+          {dict.exportCta}
+        </Link>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {analysis.keywords_to_add.length > 0 && (

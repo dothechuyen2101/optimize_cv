@@ -9,6 +9,7 @@ import {
   resumes,
   resumeVersions,
   suggestionDecisions,
+  summaryDecisions,
 } from "@/db/schema";
 import type { Locale } from "@/i18n/config";
 import { PARSE_CV_PROMPT } from "@/lib/ai/prompts/parse-cv";
@@ -21,7 +22,7 @@ import { parseJd } from "@/lib/ai/steps/parse-jd";
 import { PLAN_ANALYSIS_LIMITS, STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
 import type { CvUpload } from "@/lib/parsing/cv-document";
 import type { AnalysisOutcome, Stored } from "./run-analysis";
-import type { AnalysisReport, Decision } from "./types";
+import { MAX_SUGGESTION_TEXT, type AnalysisReport, type Choice, type Choices, type SuggestionTarget } from "./types";
 
 // Every function takes the signed-in user's id and scopes its queries to it:
 // the database connection bypasses RLS.
@@ -238,7 +239,7 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
 export async function getAnalysisReport(
   userId: string,
   analysisId: string,
-): Promise<{ report: AnalysisReport; decisions: Record<number, Decision> } | null> {
+): Promise<{ report: AnalysisReport; choices: Choices } | null> {
   if (!isUuid(analysisId)) return null;
   const db = getDb();
   const [row] = await db
@@ -256,11 +257,19 @@ export async function getAnalysisReport(
     .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
   if (!row?.ats || !row.result || !row.market) return null;
 
-  const [decisionRows, [cost]] = await Promise.all([
+  const [bulletRows, [summary], [cost]] = await Promise.all([
     db
-      .select({ index: suggestionDecisions.suggestionIndex, decision: suggestionDecisions.decision })
+      .select({
+        index: suggestionDecisions.suggestionIndex,
+        decision: suggestionDecisions.decision,
+        text: suggestionDecisions.editedText,
+      })
       .from(suggestionDecisions)
       .where(eq(suggestionDecisions.analysisId, analysisId)),
+    db
+      .select({ decision: summaryDecisions.decision, text: summaryDecisions.editedText })
+      .from(summaryDecisions)
+      .where(eq(summaryDecisions.analysisId, analysisId)),
     db.select({ total: sum(aiUsage.costUsd) }).from(aiUsage).where(eq(aiUsage.analysisId, analysisId)),
   ]);
 
@@ -274,35 +283,58 @@ export async function getAnalysisReport(
       analysis: row.result,
       costUsd: Number(cost?.total ?? 0),
     },
-    decisions: Object.fromEntries(decisionRows.map(({ index, decision }) => [index, decision])),
+    choices: {
+      bullets: Object.fromEntries(bulletRows.map(({ index, decision, text }) => [index, { decision, text }])),
+      summary: summary ?? null,
+    },
   };
 }
 
 /** Saves or clears the user's choice on one suggestion of their own analysis. */
-export async function setDecision(
+export async function setChoice(
   userId: string,
   analysisId: string,
-  index: number,
-  decision: Decision | null,
+  target: SuggestionTarget,
+  choice: Choice | null,
 ): Promise<void> {
-  if (!isUuid(analysisId) || !Number.isInteger(index) || index < 0) return;
+  if (!isUuid(analysisId)) return;
+  if (target.kind === "bullet" && (!Number.isInteger(target.index) || target.index < 0)) return;
   const db = getDb();
   const [owned] = await db
     .select({ result: analyses.result })
     .from(analyses)
     .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId)));
-  if (!owned?.result || index >= owned.result.bullet_suggestions.length) return;
+  const suggestion =
+    target.kind === "summary" ? owned?.result?.summary_rewrite : owned?.result?.bullet_suggestions[target.index];
+  if (!suggestion) return;
 
-  const key = and(eq(suggestionDecisions.analysisId, analysisId), eq(suggestionDecisions.suggestionIndex, index));
-  if (decision === null) {
+  // Wording identical to the AI's is stored as null.
+  const text = choice?.text?.trim().slice(0, MAX_SUGGESTION_TEXT) || null;
+  const values = choice && { decision: choice.decision, editedText: text === suggestion.proposed ? null : text };
+
+  if (target.kind === "summary") {
+    const key = eq(summaryDecisions.analysisId, analysisId);
+    if (!values) {
+      await db.delete(summaryDecisions).where(key);
+      return;
+    }
+    await db
+      .insert(summaryDecisions)
+      .values({ analysisId, ...values })
+      .onConflictDoUpdate({ target: summaryDecisions.analysisId, set: { ...values, updatedAt: new Date() } });
+    return;
+  }
+
+  const key = and(eq(suggestionDecisions.analysisId, analysisId), eq(suggestionDecisions.suggestionIndex, target.index));
+  if (!values) {
     await db.delete(suggestionDecisions).where(key);
     return;
   }
   await db
     .insert(suggestionDecisions)
-    .values({ analysisId, suggestionIndex: index, decision })
+    .values({ analysisId, suggestionIndex: target.index, ...values })
     .onConflictDoUpdate({
       target: [suggestionDecisions.analysisId, suggestionDecisions.suggestionIndex],
-      set: { decision, updatedAt: new Date() },
+      set: { ...values, updatedAt: new Date() },
     });
 }

@@ -211,7 +211,29 @@
       },
       "cost": "Estimated AI cost: {cost}",
       "newAnalysis": "Analyze another resume",
-      "disclaimer": "These are AI suggestions. Only put on your resume what is true about your real experience."
+      "disclaimer": "These are AI suggestions. Only put on your resume what is true about your real experience.",
+      "edited": "edited",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "fillPlaceholders": "Replace {placeholders} with your real numbers before exporting your resume.",
+      "exportTitle": "Export the revised resume",
+      "exportBody": "Apply the {count} changes you accepted, preview the result, then download it as PDF or Word.",
+      "exportEmpty": "Accept suggestions above, then preview and download the revised resume as PDF or Word.",
+      "exportCta": "Preview and download"
     }
+  },
+  "cv": {
+    "title": "Revised resume",
+    "subtitle": "Your resume with the suggestions you accepted, in a single-column ATS-friendly layout.",
+    "back": "Back to the analysis",
+    "downloadPdf": "Download PDF",
+    "downloadDocx": "Download Word (DOCX)",
+    "applied": "{count} changes applied, highlighted in green in the preview. Downloads have no highlighting.",
+    "noChanges": "You haven't accepted any suggestions, so this matches your original resume.",
+    "unfilled": "{count} lines still have gaps like [X%] (highlighted in yellow). Go back and fill them before downloading.",
+    "unplaced": "{count} accepted suggestions couldn't be matched to a line in your resume, so they weren't applied. You can add them in the Word file.",
+    "photoNote": "The export has no photo or date of birth. If the employer asks for them, add them in the Word file.",
+    "templateNote": "The download uses a new layout, not your original design. Read it through before you apply."
   }
 }

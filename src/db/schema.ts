@@ -120,10 +120,22 @@ export const suggestionDecisions = pgTable(
     // Position in analyses.result.bullet_suggestions.
     suggestionIndex: integer("suggestion_index").notNull(),
     decision: decisionEnum("decision").notNull(),
+    // The user's own wording of an accepted suggestion (e.g. with placeholders filled); null keeps the AI's.
+    editedText: text("edited_text"),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.analysisId, table.suggestionIndex] })],
 ).enableRLS();
+
+// The choice on analyses.result.summary_rewrite, one per analysis.
+export const summaryDecisions = pgTable("summary_decisions", {
+  analysisId: uuid("analysis_id")
+    .primaryKey()
+    .references(() => analyses.id, { onDelete: "cascade" }),
+  decision: decisionEnum("decision").notNull(),
+  editedText: text("edited_text"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}).enableRLS();
 
 export const aiUsage = pgTable(
   "ai_usage",

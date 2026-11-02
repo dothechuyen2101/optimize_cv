@@ -10,10 +10,10 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Song ngữ vi/en (`/vi`, `/en`, tự chọn theo trình duyệt) | Xong |
 | Tối ưu CV theo JD: upload PDF/DOCX/TXT, điểm ATS, gợi ý từng bullet, viết lại summary | Xong |
 | Đăng nhập email + mật khẩu (Supabase Auth): đăng ký, đăng nhập, quên/đặt lại mật khẩu, đăng xuất | Xong |
-| Lưu lịch sử, trang xem lại, lưu lựa chọn chấp nhận/bỏ qua gợi ý | Xong |
+| Lưu lịch sử, trang xem lại, lưu lựa chọn chấp nhận/bỏ qua/sửa gợi ý (cả bullet lẫn summary) | Xong |
+| Xuất CV đã chỉnh sửa: xem trước, tải PDF và DOCX theo mẫu ATS một cột | Xong |
 | Quota gói free: 3 lượt/tháng (UTC) | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
-| Xuất CV PDF/DOCX | Chưa làm |
 | Phân tích role, review portfolio, luyện phỏng vấn chat/voice, thanh toán | Chưa làm (Phase 2–5) |
 
 ## Chạy local
@@ -80,6 +80,16 @@ Chi phí tối ưu theo các cách sau:
 
 Mọi lời gọi AI đi qua một client duy nhất là [src/lib/ai/client.ts](src/lib/ai/client.ts).
 
+### Xuất CV đã chỉnh sửa
+
+Người dùng chấp nhận, bỏ qua hoặc sửa lại từng gợi ý; app nhắc điền các chỗ trống kiểu `[X%]` trước khi xuất. Trang `/[lang]/analyses/[id]/cv` xem trước CV, còn `GET /api/analyses/[id]/cv?format=pdf|docx` tải file. Phần xuất không gọi AI:
+
+1. [revise.ts](src/lib/export/revise.ts) thay các dòng đã chấp nhận vào CV đã parse. Dòng gốc được tìm theo vị trí AI trả về; nếu không khớp thì tìm theo nội dung. Gợi ý không tìm thấy dòng gốc sẽ được báo lại, không bị chèn bừa.
+2. [document.ts](src/lib/export/document.ts) dựng bố cục chung, dùng tiêu đề mục theo ngôn ngữ của CV.
+3. Bố cục này được render ra ba dạng: HTML để xem trước, PDF ([pdf.tsx](src/lib/export/pdf.tsx), `@react-pdf/renderer`) và DOCX ([docx.ts](src/lib/export/docx.ts), `docx`).
+
+PDF nhúng font Be Vietnam Pro (giấy phép OFL, nằm trong `src/lib/export/fonts/`), vì font mặc định của PDF không có dấu tiếng Việt. `next.config.ts` khai báo `outputFileTracingIncludes` để font được đóng gói vào route khi deploy. DOCX dùng Arial để người dùng mở bằng Word là sửa tiếp được.
+
 ## Cấu trúc thư mục
 
 ```
@@ -93,6 +103,7 @@ src/
   lib/ats/                chuẩn hoá văn bản và chấm điểm ATS
   lib/analysis/           pipeline và kiểu dữ liệu báo cáo
   lib/parsing/            đọc file CV
+  lib/export/             ghép gợi ý vào CV, xuất PDF/DOCX, font nhúng
   db/                     schema Drizzle và migrations
 ```
 

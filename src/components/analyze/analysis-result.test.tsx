@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import en from "@/i18n/dictionaries/en.json";
 import viDict from "@/i18n/dictionaries/vi.json";
-import type { AnalysisReport } from "@/lib/analysis/types";
+import type { AnalysisReport, Choices } from "@/lib/analysis/types";
 import { scoreAts } from "@/lib/ats/score";
 import { makeAnalysis, makeJob, makeResume } from "@/test/fixtures";
 import { AnalysisResult } from "./analysis-result";
@@ -22,9 +22,17 @@ function makeReport(overrides: Partial<AnalysisReport> = {}): AnalysisReport {
   };
 }
 
-function render(report: AnalysisReport, dict = viDict.analyze, initialDecisions = {}) {
+const NONE: Choices = { bullets: {}, summary: null };
+
+function render(report: AnalysisReport, dict = viDict.analyze, initialChoices = NONE) {
   return renderToStaticMarkup(
-    <AnalysisResult report={report} dict={dict} newAnalysisHref="/vi/analyze" initialDecisions={initialDecisions} />,
+    <AnalysisResult
+      report={report}
+      dict={dict}
+      newAnalysisHref="/vi/analyze"
+      exportHref="/vi/analyses/x/cv"
+      initialChoices={initialChoices}
+    />,
   );
 }
 
@@ -50,10 +58,33 @@ describe("AnalysisResult", () => {
     expect(html).toContain("Accepted 0/1 suggestions");
   });
 
-  it("restores saved decisions", () => {
-    const html = render(makeReport(), viDict.analyze, { 0: "accepted" });
+  it("restores saved choices and counts them toward the export", () => {
+    const html = render(makeReport(), viDict.analyze, {
+      bullets: { 0: { decision: "accepted", text: null } },
+      summary: { decision: "accepted", text: null },
+    });
     expect(html).toContain("Đã chấp nhận 1/1 gợi ý");
     expect(html).toContain(viDict.analyze.result.copyAccepted);
+    expect(html).toContain("Ghép 2 thay đổi bạn đã chấp nhận vào CV");
+    expect(html).toContain('href="/vi/analyses/x/cv"');
+  });
+
+  it("shows the user's wording and asks them to fill remaining placeholders", () => {
+    const analysis = makeAnalysis();
+    analysis.bullet_suggestions[0] = { ...analysis.bullet_suggestions[0], proposed: "Cut latency by [X%]" };
+    const filled = render(makeReport({ analysis }), viDict.analyze, {
+      bullets: { 0: { decision: "accepted", text: "Cut latency by 35%" } },
+      summary: null,
+    });
+    expect(filled).toContain("Cut latency by 35%");
+    expect(filled).toContain("(đã sửa)");
+    expect(filled).not.toContain("Điền [X%]");
+
+    const unfilled = render(makeReport({ analysis }), viDict.analyze, {
+      bullets: { 0: { decision: "accepted", text: null } },
+      summary: null,
+    });
+    expect(unfilled).toContain("Điền [X%] bằng số liệu thật");
   });
 
   it("shows the empty format state and hides empty optional sections", () => {
