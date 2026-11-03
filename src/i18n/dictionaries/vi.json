@@ -282,7 +282,9 @@
     "role": "Phân tích role",
     "roleBody": "Giải mã JD: role thực chất làm gì, các vòng phỏng vấn thường gặp và câu hỏi để luyện.",
     "interview": "Luyện phỏng vấn",
-    "interviewBody": "Phỏng vấn thử bằng chat với AI theo CV và JD này, có nhận xét và chấm điểm."
+    "interviewBody": "Phỏng vấn thử bằng chat với AI theo CV và JD này, có nhận xét và chấm điểm.",
+    "portfolio": "Review portfolio",
+    "portfolioBody": "Đánh giá GitHub, website hoặc file PDF portfolio theo đúng JD này."
   },
   "role": {
     "title": "Phân tích role",
@@ -386,6 +388,59 @@
       "answer_empty": "Hãy nhập câu trả lời.",
       "answer_too_long": "Câu trả lời quá dài, tối đa 4000 ký tự.",
       "no_answers": "Hãy trả lời ít nhất một câu trước khi chấm điểm."
+    }
+  },
+  "portfolio": {
+    "title": "Review portfolio",
+    "subtitle": "AI đọc portfolio của bạn như một nhà tuyển dụng cho đúng JD này: điểm mạnh, chỗ cần sửa và dự án nên đưa lên đầu.",
+    "back": "Quay lại kết quả phân tích",
+    "github": "GitHub",
+    "githubPlaceholder": "username hoặc https://github.com/username",
+    "githubHint": "AI xem profile và tối đa 6 repo nổi bật cùng README.",
+    "urls": "Website, Behance, Dribbble…",
+    "urlsPlaceholder": "Mỗi dòng một link, tối đa 3 link",
+    "urlsHint": "Trang dựng hoàn toàn bằng JavaScript (như Behance) thường chỉ đọc được rất ít; khi đó hãy xuất PDF.",
+    "pdf": "File PDF portfolio",
+    "pdfHint": "Tối đa 4 MB và 100 trang. AI xem cả hình ảnh từng trang.",
+    "pdfSelected": "Đã chọn: {name}",
+    "submit": "Review portfolio",
+    "submitting": "Đang đọc portfolio và đánh giá, thường mất 1–2 phút…",
+    "quotaLeft": "Còn {remaining}/{limit} lần review miễn phí tháng này. Lần không đọc được nguồn nào sẽ không bị trừ.",
+    "unlimited": "Lần không đọc được nguồn nào sẽ không bị trừ lượt.",
+    "previous": "Các lần review trước",
+    "resultTitle": "Kết quả review portfolio",
+    "overall": "Điểm tổng",
+    "rubric": {
+      "relevance": "Đúng role",
+      "depth": "Chiều sâu",
+      "presentation": "Trình bày",
+      "credibility": "Độ tin cậy",
+      "completeness": "Đầy đủ"
+    },
+    "sources": "Từng nguồn",
+    "strengths": "Điểm mạnh",
+    "improvements": "Việc nên làm, theo mức ưu tiên",
+    "priority": {
+      "high": "Ưu tiên cao",
+      "medium": "Trung bình",
+      "low": "Thấp"
+    },
+    "why": "Vì sao",
+    "where": "Sửa ở đâu",
+    "featured": "Nên đưa lên đầu",
+    "missing": "Role này mong thấy nhưng chưa có",
+    "again": "Review lại sau khi sửa",
+    "reviewed": "Đã review",
+    "errors": {
+      "quota_exceeded": "Bạn đã dùng hết lượt review portfolio miễn phí của tháng này.",
+      "no_sources": "Hãy nhập GitHub, ít nhất một link hoặc chọn file PDF.",
+      "too_many_urls": "Tối đa 3 link mỗi lần review.",
+      "invalid_url": "Có link không hợp lệ.",
+      "invalid_github": "Username hoặc link GitHub không hợp lệ.",
+      "sources_unreachable": "Không đọc được nguồn nào: link có thể sai, bị chặn hoặc là trang riêng tư. Lần này không bị trừ lượt.",
+      "too_many_pages": "File PDF dài hơn 100 trang.",
+      "file_type": "Chỉ hỗ trợ file PDF.",
+      "file_too_large": "File PDF vượt quá 4 MB."
     }
   }
 }

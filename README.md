@@ -20,7 +20,8 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
 | Phân tích role: giải mã JD, yêu cầu bắt buộc/ưu tiên, vòng phỏng vấn, câu hỏi luyện tập (miễn phí, 1 lần mỗi phân tích CV) | Xong |
 | Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (free 2 buổi/tháng) | Xong |
-| Review portfolio, phỏng vấn voice realtime, thanh toán | Chưa làm (Phase 3–5) |
+| Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
+| Phỏng vấn voice realtime, thanh toán | Chưa làm (Phase 4–5, cần tài khoản LiveKit/STT/TTS và Stripe/PayOS) |
 
 ## Chạy local
 
@@ -135,6 +136,21 @@ Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng 
 - Mỗi buổi tối đa 40 lượt; câu trả lời tối đa 4000 ký tự.
 - Danh sách các buổi ở `/[lang]/interviews`.
 
+### Review portfolio
+
+`POST /api/portfolio-reviews` nhận dữ liệu multipart gồm GitHub (username hoặc link), tối đa 3 link và file PDF tùy chọn (tối đa 4 MB, 100 trang). Route đọc các nguồn rồi đánh giá theo JD và CV của bản phân tích bằng step `portfolio_review` (hạng `strong`). Kết quả lưu ở bảng `portfolio_reviews`.
+
+Đọc nguồn ([src/lib/portfolio/fetch.ts](src/lib/portfolio/fetch.ts)):
+- **GitHub:** gọi GitHub API để lấy profile và tối đa 6 repo nổi bật kèm 3000 ký tự đầu của README. Đặt biến tùy chọn `GITHUB_TOKEN` để vượt giới hạn 60 request/giờ của truy cập ẩn danh.
+- **Website:** server tự tải trang và trích tiêu đề, mô tả, text và link. Trang dựng hoàn toàn bằng JavaScript (như Behance) chỉ đọc được rất ít; AI sẽ nói rõ điều đó và gợi ý xuất PDF.
+- **Chống SSRF:**
+  - chỉ cho phép http/https ở cổng mặc định, không có user:pass trong URL;
+  - DNS được tra ngay trong lúc kết nối, và mọi IP mà hostname trỏ tới phải là IP công khai (chặn loopback, mạng nội bộ, link-local và metadata của cloud, IPv6 ULA…);
+  - redirect được xử lý thủ công và kiểm tra lại ở từng bước;
+  - giới hạn 10 giây và 1.5 MB mỗi trang.
+
+Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi không đọc được nguồn nào (khi đó không gọi AI).
+
 ## Cấu trúc thư mục
 
 ```
@@ -150,6 +166,7 @@ src/
   lib/parsing/            đọc file CV
   lib/export/             ghép gợi ý vào CV, xuất PDF/DOCX, font nhúng
   lib/role/, lib/interview/   phân tích role, phiên luyện phỏng vấn và quota
+  lib/portfolio/          đọc GitHub/website an toàn (chống SSRF), review portfolio và quota
   db/                     schema Drizzle và migrations
 ```
 

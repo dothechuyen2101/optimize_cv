@@ -16,6 +16,7 @@ import {
 import { authUsers } from "drizzle-orm/supabase";
 import type { Analysis } from "@/lib/ai/schemas/analysis";
 import type { AnswerFeedback, InterviewReport } from "@/lib/ai/schemas/interview";
+import type { PortfolioReview } from "@/lib/ai/schemas/portfolio";
 import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { RoleReport } from "@/lib/ai/schemas/role";
@@ -258,4 +259,27 @@ export const interviewTurns = pgTable(
     createdAt: createdAt(),
   },
   (table) => [primaryKey({ columns: [table.sessionId, table.position] })],
+).enableRLS();
+
+// A review of the user's portfolio links and/or PDF against the job of one of their CV analyses.
+export const portfolioReviews = pgTable(
+  "portfolio_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => analyses.id, { onDelete: "cascade" }),
+    // What the user submitted; the PDF itself isn't stored.
+    sources: jsonb("sources").$type<{ github: string | null; urls: string[]; pdf: string | null }>().notNull(),
+    status: analysisStatusEnum("status").notNull().default("running"),
+    result: jsonb("result").$type<PortfolioReview>(),
+    promptVersion: text("prompt_version").notNull(),
+    errorCode: text("error_code"),
+    createdAt: createdAt(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [index("portfolio_reviews_user_idx").on(table.userId, table.createdAt)],
 ).enableRLS();

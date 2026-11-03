@@ -282,7 +282,9 @@
     "role": "Role analysis",
     "roleBody": "Decode the JD: what the job really is, the usual interview rounds and questions to practice.",
     "interview": "Practice interview",
-    "interviewBody": "A mock interview by chat with AI, based on this CV and JD, with feedback and a score."
+    "interviewBody": "A mock interview by chat with AI, based on this CV and JD, with feedback and a score.",
+    "portfolio": "Portfolio review",
+    "portfolioBody": "Review your GitHub, website or portfolio PDF against this JD."
   },
   "role": {
     "title": "Role analysis",
@@ -386,6 +388,59 @@
       "answer_empty": "Type an answer first.",
       "answer_too_long": "The answer is too long, 4000 characters at most.",
       "no_answers": "Answer at least one question before scoring."
+    }
+  },
+  "portfolio": {
+    "title": "Portfolio review",
+    "subtitle": "AI reads your portfolio the way a hiring manager for this JD would: what works, what to fix and which projects to show first.",
+    "back": "Back to the analysis",
+    "github": "GitHub",
+    "githubPlaceholder": "username or https://github.com/username",
+    "githubHint": "The AI looks at your profile and up to 6 notable repositories with their READMEs.",
+    "urls": "Website, Behance, Dribbble…",
+    "urlsPlaceholder": "One link per line, up to 3",
+    "urlsHint": "Pages built entirely with JavaScript (like Behance) often show very little; export a PDF instead.",
+    "pdf": "Portfolio PDF",
+    "pdfHint": "Up to 4 MB and 100 pages. The AI sees every page, images included.",
+    "pdfSelected": "Selected: {name}",
+    "submit": "Review portfolio",
+    "submitting": "Reading and reviewing your portfolio, usually 1–2 minutes…",
+    "quotaLeft": "{remaining}/{limit} free reviews left this month. A review that can't read any source isn't counted.",
+    "unlimited": "A review that can't read any source isn't counted.",
+    "previous": "Earlier reviews",
+    "resultTitle": "Portfolio review",
+    "overall": "Overall",
+    "rubric": {
+      "relevance": "Relevance",
+      "depth": "Depth",
+      "presentation": "Presentation",
+      "credibility": "Credibility",
+      "completeness": "Completeness"
+    },
+    "sources": "Source by source",
+    "strengths": "Strengths",
+    "improvements": "What to do, by priority",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "why": "Why",
+    "where": "Where",
+    "featured": "Show these first",
+    "missing": "What this role expects but is missing",
+    "again": "Review again after your changes",
+    "reviewed": "Reviewed",
+    "errors": {
+      "quota_exceeded": "You've used this month's free portfolio reviews.",
+      "no_sources": "Add your GitHub, at least one link or a PDF.",
+      "too_many_urls": "Up to 3 links per review.",
+      "invalid_url": "One of the links isn't valid.",
+      "invalid_github": "That GitHub username or link isn't valid.",
+      "sources_unreachable": "None of the sources could be read: the links may be wrong, blocked or private. This review wasn't counted.",
+      "too_many_pages": "The PDF is longer than 100 pages.",
+      "file_type": "Only PDF files are supported.",
+      "file_too_large": "The PDF is larger than 4 MB."
     }
   }
 }

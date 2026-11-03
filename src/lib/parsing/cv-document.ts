@@ -45,23 +45,36 @@ function pdfBytes(buffer: Buffer): Buffer {
 const MIN_TEXT_LAYER_LETTERS = 150;
 const MAX_TEXT_LAYER_CHARS = 40_000;
 
-/** The PDF's text layer, or null for scans and layers too garbled to trust. */
-async function pdfTextLayer(buffer: Buffer): Promise<string | null> {
+/** The PDF's page count and text layer; the text is null for scans and layers too garbled to trust. */
+async function pdfTextLayer(buffer: Buffer): Promise<{ text: string | null; pages: number | null }> {
   try {
     // Copied, since pdf.js may detach the buffer it is given.
     const extracted = await extractText(await getDocumentProxy(new Uint8Array(buffer)), { mergePages: true });
+    const pages = extracted.totalPages;
     // Glyphs without a Unicode mapping (often ligatures like "ffi") come out as control characters;
     // mark them so the model reads those letters off the page instead.
-    const text = extracted.text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "�");
+    const text = extracted.text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "\uFFFD");
     const letters = text.match(/\p{L}/gu)?.length ?? 0;
-    const garbled = text.match(/[�-]/g)?.length ?? 0;
-    if (letters < MIN_TEXT_LAYER_LETTERS || garbled > letters * 0.05) return null;
-    return text.slice(0, MAX_TEXT_LAYER_CHARS);
+    const garbled = text.match(/[\uFFFD\uE000-\uF8FF]/g)?.length ?? 0;
+    if (letters < MIN_TEXT_LAYER_LETTERS || garbled > letters * 0.05) return { text: null, pages };
+    return { text: text.slice(0, MAX_TEXT_LAYER_CHARS), pages };
   } catch (error) {
     // The model can still read the pages, just less accurately.
     console.warn("[cv] PDF text layer extraction failed", error);
-    return null;
+    return { text: null, pages: null };
   }
+}
+
+/** The model reads at most this many PDF pages per request. */
+export const MAX_PDF_PAGES = 100;
+
+/** Any PDF upload (e.g. a portfolio) prepared like a CV's: trimmed bytes, text layer and page count. */
+export async function readPdfFile(file: File, maxBytes: number) {
+  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) throw new CvFileRejected("file_type");
+  if (file.size > maxBytes) throw new CvFileRejected("file_too_large");
+  const buffer = pdfBytes(Buffer.from(await file.arrayBuffer()));
+  const { text, pages } = await pdfTextLayer(buffer);
+  return { base64: buffer.toString("base64"), text, pages, fileName: file.name };
 }
 
 async function docxText(buffer: Buffer): Promise<string> {
@@ -89,7 +102,8 @@ export async function readCvUpload(file: File): Promise<CvUpload> {
   const buffer = kind === "pdf" ? pdfBytes(raw) : raw;
   const upload = { contentHash: sha256Hex(buffer), fileName: file.name };
   if (kind === "pdf") {
-    return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64"), text: await pdfTextLayer(buffer) } };
+    const { text } = await pdfTextLayer(buffer);
+    return { ...upload, document: { kind: "pdf", base64: buffer.toString("base64"), text } };
   }
 
   const text = kind === "docx" ? await docxText(buffer) : buffer.toString("utf8");

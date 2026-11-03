@@ -5,7 +5,7 @@ import { defaultLocale, hasLocale, LOCALE_COOKIE, locales, type Locale } from "@
 import { updateSession } from "@/lib/supabase/proxy";
 
 // First path segment after the locale.
-const SIGNED_IN_ONLY = new Set(["analyze", "history", "analyses", "interviews", "reset-password"]);
+const SIGNED_IN_ONLY = new Set(["analyze", "history", "analyses", "interviews", "portfolio", "reset-password"]);
 const SIGNED_OUT_ONLY = new Set(["login", "signup"]);
 
 function preferredLocale(request: NextRequest): Locale {

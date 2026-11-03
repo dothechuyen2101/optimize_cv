@@ -5,7 +5,7 @@ import { groundResume } from "./ground";
 // Shaped like a real PDF text layer: wrapped lines, icons, bullet dashes.
 const SOURCE = `Nguyễn Văn Bình
 Software Engineer
- 0912345678
+\uE0B0 0912345678
 ✉ binh.nguyen@example.com
 WORK EXPERIENCE
 Digital banking development
@@ -65,7 +65,7 @@ describe("groundResume", () => {
 
   it("trusts the model's reading where the source couldn't decode a ligature", () => {
     const resume = resumeWith({ summary: "App backoffice for inside member and microservice for SMB." });
-    const source = "App backo�ce for inside member and microservice for SMB.";
+    const source = "App backo\uFFFDce for inside member and microservice for SMB.";
 
     expect(groundResume(resume, source).resume.summary).toBe("App backoffice for inside member and microservice for SMB.");
   });

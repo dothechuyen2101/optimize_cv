@@ -7,7 +7,8 @@ export type StepName =
   | "analyze_match"
   | "role_analysis"
   | "interview_turn"
-  | "interview_report";
+  | "interview_report"
+  | "portfolio_review";
 
 export interface StepConfig {
   tier: ModelTier;
@@ -28,4 +29,5 @@ export const STEP_CONFIG: Record<StepName, StepConfig> = {
   // A chat turn: latency matters more than depth.
   interview_turn: { tier: "fast", effort: "low", maxTokens: 2000 },
   interview_report: { tier: "strong", effort: "medium", maxTokens: 8000 },
+  portfolio_review: { tier: "strong", effort: "medium", maxTokens: 10000 },
 };

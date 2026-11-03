@@ -107,7 +107,7 @@ function snap(value: string, source: Source): string | null {
   );
   let span = source.original.slice(source.origin[closest.start], source.origin[closest.end - 1] + 1).trim();
   // The source couldn't decode a character there; the model's reading of the page is the better guess.
-  if (span.includes("�")) return null;
+  if (span.includes("\uFFFD")) return null;
   // Keep list separators and bullet marks out of the field unless the model had them too.
   const trimmed = value.trim();
   if (!/[,;:]$/.test(trimmed)) span = span.replace(/[\s,;:]+$/, "");

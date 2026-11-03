@@ -22,10 +22,11 @@ async function AnalysisDetail({ params }: { params: PageProps<"/[lang]/analyses/
       <Link href={`/${locale}/history`} className="text-sm text-subtle hover:text-foreground">
         ← {history.back}
       </Link>
-      <nav aria-label={nextSteps.title} className="mt-4 grid gap-3 sm:grid-cols-2">
+      <nav aria-label={nextSteps.title} className="mt-4 grid gap-3 sm:grid-cols-3">
         {[
           { href: `/${locale}/analyses/${id}/role`, title: nextSteps.role, body: nextSteps.roleBody },
           { href: `/${locale}/analyses/${id}/interview`, title: nextSteps.interview, body: nextSteps.interviewBody },
+          { href: `/${locale}/analyses/${id}/portfolio`, title: nextSteps.portfolio, body: nextSteps.portfolioBody },
         ].map((step) => (
           <Link key={step.href} href={step.href} className="rounded-xl border border-line bg-card p-4 hover:border-primary">
             <p className="font-semibold text-primary">{step.title} →</p>
