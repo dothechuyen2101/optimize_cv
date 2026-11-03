@@ -73,7 +73,8 @@
       "failed": "Lỗi"
     },
     "untitledJob": "JD chưa đọc được",
-    "back": "Lịch sử"
+    "back": "Lịch sử",
+    "revised": "Đánh giá lại"
   },
   "home": {
     "eyebrow": "Dành cho ứng viên Việt Nam và quốc tế",
@@ -220,7 +221,9 @@
       "exportTitle": "Xuất CV đã chỉnh sửa",
       "exportBody": "Ghép {count} thay đổi bạn đã chấp nhận vào CV, xem trước rồi tải về dạng PDF hoặc Word.",
       "exportEmpty": "Chấp nhận các gợi ý ở trên, rồi xem trước và tải CV đã sửa dạng PDF hoặc Word.",
-      "exportCta": "Xem và tải CV"
+      "exportCta": "Xem và tải CV",
+      "previousScore": "So với lần đánh giá trước: {before} → {after}",
+      "viewPrevious": "Xem bản trước"
     }
   },
   "cv": {
@@ -248,6 +251,19 @@
     "addPhone": "Thêm số điện thoại",
     "addLocation": "Thêm địa chỉ",
     "saving": "Đang lưu…",
-    "saveFailed": "Chưa lưu được thay đổi gần nhất. Hãy kiểm tra kết nối rồi sửa lại."
+    "saveFailed": "Chưa lưu được thay đổi gần nhất. Hãy kiểm tra kết nối rồi sửa lại.",
+    "reevaluateTitle": "Đánh giá lại CV đã sửa",
+    "reevaluateBody": "Chấm lại CV như bản xem trước bên dưới, gồm các gợi ý đã chấp nhận và những chỗ bạn tự sửa, với cùng JD.",
+    "rescore": "Chấm lại điểm ATS (miễn phí)",
+    "rescoring": "Đang chấm…",
+    "reanalyze": "Phân tích lại bằng AI",
+    "reanalyzeQuota": "Phân tích lại bằng AI cho nhận định và gợi ý mới, trừ 1 lượt (còn {remaining}/{limit} lượt tháng này). Nếu CV không đổi so với lần phân tích lại trước, bạn sẽ xem lại kết quả cũ mà không bị trừ lượt.",
+    "reanalyzeUnlimited": "Phân tích lại bằng AI cho nhận định và gợi ý mới.",
+    "noChangesToAnalyze": "Hãy chấp nhận gợi ý hoặc sửa CV trước khi phân tích lại bằng AI.",
+    "finishEditing": "Hãy lưu dòng đang sửa trước khi đánh giá lại.",
+    "scoreLabel": "Điểm ATS",
+    "unchanged": "không đổi",
+    "rescoreNote": "Điểm ATS được chấm bằng code, theo cùng JD và tiêu chí như lần đầu. Muốn có nhận định và gợi ý mới, hãy phân tích lại bằng AI.",
+    "rescoreFailed": "Chưa chấm lại được điểm. Hãy thử lại."
   }
 }

@@ -18,6 +18,7 @@ function makeReport(overrides: Partial<AnalysisReport> = {}): AnalysisReport {
     ats: scoreAts(resume, job, "vn"),
     analysis: makeAnalysis(),
     costUsd: 0.1234,
+    previous: null,
     ...overrides,
   };
 }
@@ -85,6 +86,24 @@ describe("AnalysisResult", () => {
       summary: null,
     });
     expect(unfilled).toContain("Điền [X%] bằng số liệu thật");
+  });
+
+  it("compares a re-evaluation with the analysis it came from", () => {
+    const report = makeReport();
+    const html = renderToStaticMarkup(
+      <AnalysisResult
+        report={{ ...report, previous: { id: "prev", overall: report.ats.overall - 12 } }}
+        dict={viDict.analyze}
+        newAnalysisHref="/vi/analyze"
+        exportHref="/vi/analyses/x/cv"
+        previousHref="/vi/analyses/prev"
+      />,
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain(`So với lần đánh giá trước: ${report.ats.overall - 12} → ${report.ats.overall}`);
+    expect(html).toContain("(+12)");
+    expect(html).toContain('href="/vi/analyses/prev"');
+    expect(render(report)).not.toContain("So với lần đánh giá trước");
   });
 
   it("shows the empty format state and hides empty optional sections", () => {

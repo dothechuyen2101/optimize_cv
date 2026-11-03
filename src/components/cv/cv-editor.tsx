@@ -2,12 +2,14 @@
 
 import { Fragment, useState, useTransition, type ReactNode } from "react";
 import { WithPlaceholders } from "@/components/analyze/with-placeholders";
-import { format } from "@/i18n/config";
+import { format, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { findPlaceholders } from "@/lib/analysis/types";
+import type { QuotaStatus } from "@/lib/billing/quota";
 import { saveCvEdit } from "@/lib/export/actions";
 import { MAX_CV_TEXT, applyCvEdits, cvTexts, type CvDocument, type CvEdits, type CvText } from "@/lib/export/document";
 import { cvFont } from "./cv-font";
+import { ReevaluatePanel } from "./reevaluate-panel";
 
 type CvDict = Dictionary["cv"];
 
@@ -25,11 +27,25 @@ interface Props {
   appliedCount: number;
   unplacedCount: number;
   showPhotoNote: boolean;
+  locale: Locale;
+  quota: QuotaStatus;
   dict: CvDict;
+  analyzeDict: Dictionary["analyze"];
 }
 
-/** The CV preview, where any line can be clicked and edited before downloading. */
-export function CvEditor({ analysisId, document, initialEdits, appliedCount, unplacedCount, showPhotoNote, dict }: Props) {
+/** The CV preview, where any line can be clicked and edited before downloading or re-evaluating. */
+export function CvEditor({
+  analysisId,
+  document,
+  initialEdits,
+  appliedCount,
+  unplacedCount,
+  showPhotoNote,
+  locale,
+  quota,
+  dict,
+  analyzeDict,
+}: Props) {
   const [edits, setEdits] = useState(initialEdits);
   const [editing, setEditing] = useState<{ key: string; draft: string } | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -178,6 +194,16 @@ export function CvEditor({ analysisId, document, initialEdits, appliedCount, unp
         {unplacedCount > 0 && <Notice tone="warning">{format(dict.unplaced, { count: unplacedCount })}</Notice>}
         {showPhotoNote && <Notice tone="info">{dict.photoNote}</Notice>}
       </div>
+
+      <ReevaluatePanel
+        analysisId={analysisId}
+        locale={locale}
+        quota={quota}
+        hasChanges={appliedCount > 0 || editedCount > 0}
+        blocked={saving || editing !== null}
+        dict={dict}
+        analyzeDict={analyzeDict}
+      />
 
       {/* A white page in light and dark mode alike, like the file it previews. */}
       <article

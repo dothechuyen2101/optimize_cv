@@ -15,6 +15,8 @@ export interface AnalysisReport {
   analysis: Analysis;
   /** Estimated AI spend recorded for this analysis. */
   costUsd: number;
+  /** The analysis whose revised CV this one re-evaluates. */
+  previous: { id: string; overall: number } | null;
 }
 
 export type Decision = "accepted" | "rejected";

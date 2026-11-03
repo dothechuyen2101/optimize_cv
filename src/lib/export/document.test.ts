@@ -2,7 +2,7 @@ import mammoth from "mammoth";
 import { describe, expect, it, vi } from "vitest";
 import type { Choices } from "@/lib/analysis/types";
 import { makeAnalysis, makeResume } from "@/test/fixtures";
-import { applyCvEdits, buildCvDocument, cvFileName, cvTexts, pruneEmpty } from "./document";
+import { applyCvEdits, buildCvDocument, cvFileName, cvTexts, pruneEmpty, resumeFromDocument } from "./document";
 import { renderCvDocx } from "./docx";
 import { renderCvPdf } from "./pdf";
 import { reviseResume } from "./revise";
@@ -83,6 +83,56 @@ describe("hand edits", () => {
     expect(doc.sections[0].heading).toBe("Kinh nghiệm làm việc");
     expect(doc.sections[0].entries[0].bullets).toHaveLength(3);
     expect(doc.contact.map((c) => c.text)).toEqual(["a@example.com", "0900000000", "linkedin.com/in/nguyen-van-a"]);
+  });
+});
+
+describe("resumeFromDocument", () => {
+  const resume = makeResume({
+    detected_language: "vi",
+    has_photo: true,
+    links: [{ label: "GitHub", url: "https://github.com/a" }],
+    projects: [{ name: "Ví", role: "Lead", description: "Ví điện tử", bullets: ["Làm API"], technologies: ["Go", "Kafka"] }],
+    certifications: ["AWS SAA"],
+    languages: [{ language: "Tiếng Anh", proficiency: "IELTS 7.0" }, { language: "Tiếng Nhật", proficiency: null }],
+    other_sections: [{ title: "Giải thưởng", content: "Giải nhất hackathon" }],
+  });
+  const revision = reviseResume(resume, makeAnalysis(), ACCEPT_FIRST);
+  const doc = buildCvDocument(revision);
+
+  it("gives back the revised resume when nothing was edited", () => {
+    expect(resumeFromDocument(revision.resume, doc)).toEqual({ ...revision.resume, has_photo: false });
+  });
+
+  it("writes hand edits back to the fields they came from", () => {
+    const edited = applyCvEdits(doc, {
+      "contact.phone": { base: "0900000000", value: "0911222333" },
+      "contact.link.0": { base: "github.com/a", value: "" },
+      "experience.0.subtitle": { base: "Acme", value: "Acme Corp" },
+      "experience.0.dates": { base: "2021 – Hiện tại", value: "03/2021 – 06/2026" },
+      "experience.0.b.3": { base: "Mentored 3 junior engineers", value: "" },
+      "projects.0.p.1": { base: "Công nghệ: Go, Kafka", value: "Công nghệ: Go, Kafka, Redis" },
+      "skills.0.p.0": { base: "Node.js, TypeScript, PostgreSQL, Docker", value: "Node.js, TypeScript, PostgreSQL, Docker, Kubernetes" },
+      "languages.0.p.0": { base: "Tiếng Anh (IELTS 7.0), Tiếng Nhật", value: "Tiếng Anh (IELTS 7.5), Tiếng Nhật (N3)" },
+    });
+    const result = resumeFromDocument(revision.resume, edited);
+
+    expect(result.phone).toBe("0911222333");
+    expect(result.links).toEqual([]);
+    expect(result.experiences[0]).toMatchObject({
+      company: "Acme Corp",
+      location: null,
+      start_date: "03/2021",
+      end_date: "06/2026",
+      is_current: false,
+    });
+    expect(result.experiences[0].bullets).toHaveLength(3);
+    expect(result.experiences[0].bullets[0]).toBe("Designed and built REST APIs in Node.js and TypeScript serving 2M requests/day");
+    expect(result.projects[0].technologies).toEqual(["Go", "Kafka", "Redis"]);
+    expect(result.skills).toContain("Kubernetes");
+    expect(result.languages).toEqual([
+      { language: "Tiếng Anh", proficiency: "IELTS 7.5" },
+      { language: "Tiếng Nhật", proficiency: "N3" },
+    ]);
   });
 });
 

@@ -3,17 +3,18 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CvEditor } from "@/components/cv/cv-editor";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
+import { getQuota } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
 import { loadCvExport } from "@/lib/export/service";
 
 async function RevisedCv({ params }: { params: PageProps<"/[lang]/analyses/[id]/cv">["params"] }) {
   const { id } = await params;
   const locale = await getLocale();
-  const { cv: dict } = await getDictionary();
+  const { cv: dict, analyze } = await getDictionary();
 
   const user = await getSessionUser();
   if (!user) redirect(`/${locale}/login?next=/${locale}/analyses/${id}/cv`);
-  const cv = await loadCvExport(user.id, id);
+  const [cv, quota] = await Promise.all([loadCvExport(user.id, id), getQuota(user.id)]);
   if (!cv) notFound();
   const { resume } = cv.report;
 
@@ -33,7 +34,10 @@ async function RevisedCv({ params }: { params: PageProps<"/[lang]/analyses/[id]/
         appliedCount={cv.revision.changed.size}
         unplacedCount={cv.revision.unplaced.length}
         showPhotoNote={resume.has_photo || resume.has_date_of_birth}
+        locale={locale}
+        quota={quota}
         dict={dict}
+        analyzeDict={analyze}
       />
     </>
   );

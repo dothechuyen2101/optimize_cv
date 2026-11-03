@@ -73,7 +73,8 @@
       "failed": "Failed"
     },
     "untitledJob": "JD not parsed",
-    "back": "History"
+    "back": "History",
+    "revised": "Re-evaluation"
   },
   "home": {
     "eyebrow": "For candidates in Vietnam and worldwide",
@@ -220,7 +221,9 @@
       "exportTitle": "Export the revised resume",
       "exportBody": "Apply the {count} changes you accepted, preview the result, then download it as PDF or Word.",
       "exportEmpty": "Accept suggestions above, then preview and download the revised resume as PDF or Word.",
-      "exportCta": "Preview and download"
+      "exportCta": "Preview and download",
+      "previousScore": "Compared with the previous evaluation: {before} → {after}",
+      "viewPrevious": "View previous"
     }
   },
   "cv": {
@@ -248,6 +251,19 @@
     "addPhone": "Add a phone number",
     "addLocation": "Add a location",
     "saving": "Saving…",
-    "saveFailed": "Your last change wasn't saved. Check your connection and edit it again."
+    "saveFailed": "Your last change wasn't saved. Check your connection and edit it again.",
+    "reevaluateTitle": "Re-evaluate the revised resume",
+    "reevaluateBody": "Score the resume as previewed below, with the suggestions you accepted and your own edits, against the same JD.",
+    "rescore": "Rescore ATS (free)",
+    "rescoring": "Scoring…",
+    "reanalyze": "Re-analyze with AI",
+    "reanalyzeQuota": "Re-analyzing with AI gives a new verdict and suggestions and uses 1 analysis ({remaining}/{limit} left this month). If the resume hasn't changed since your last re-analysis, you'll see that result again at no cost.",
+    "reanalyzeUnlimited": "Re-analyzing with AI gives a new verdict and suggestions.",
+    "noChangesToAnalyze": "Accept a suggestion or edit the resume before re-analyzing with AI.",
+    "finishEditing": "Save the line you're editing before re-evaluating.",
+    "scoreLabel": "ATS score",
+    "unchanged": "no change",
+    "rescoreNote": "The ATS score is computed by code, against the same JD and criteria as the first time. For a new verdict and suggestions, re-analyze with AI.",
+    "rescoreFailed": "Couldn't rescore. Please try again."
   }
 }

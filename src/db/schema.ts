@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   index,
   integer,
   jsonb,
@@ -93,6 +94,8 @@ export const analyses = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
+    // Set when this analysis re-evaluates the revised CV of an earlier one.
+    parentId: uuid("parent_id").references((): AnyPgColumn => analyses.id, { onDelete: "set null" }),
     // The row is created when the run starts, to reserve quota; these fill in as it progresses.
     resumeVersionId: uuid("resume_version_id").references(() => resumeVersions.id, { onDelete: "cascade" }),
     jobDescriptionId: uuid("job_description_id").references(() => jobDescriptions.id),

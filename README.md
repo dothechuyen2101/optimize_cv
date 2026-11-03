@@ -13,6 +13,7 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Lưu lịch sử, trang xem lại, lưu lựa chọn chấp nhận/bỏ qua/sửa gợi ý (cả bullet lẫn summary) | Xong |
 | Xuất CV đã chỉnh sửa: xem trước, tải PDF và DOCX theo mẫu ATS một cột | Xong |
 | Sửa tay mọi dòng của CV (tên, liên hệ, ngày tháng, bullet…) trên trang xem trước | Xong |
+| Đánh giá lại CV đã sửa: chấm lại điểm ATS miễn phí, hoặc phân tích lại bằng AI (trừ 1 lượt) kèm so sánh điểm trước/sau | Xong |
 | Đọc CV chính xác: dùng lớp text của PDF, đối chiếu từng trường, dùng model mạnh cho CV dạng ảnh | Xong |
 | Quota gói free: 3 lượt/tháng (UTC) | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
@@ -92,7 +93,16 @@ Người dùng chấp nhận, bỏ qua hoặc sửa lại từng gợi ý; app n
 - Mỗi chỗ sửa nằm trong bảng `cv_edits`, gắn với khoá cố định của dòng đó (ví dụ `contact.phone`, `experience.0.b.2`) và lưu kèm text gốc lúc sửa.
 - Chỗ sửa chỉ được áp dụng khi dòng đó vẫn còn đúng text gốc. Vì vậy nếu người dùng đổi lựa chọn gợi ý sau đó, hành động mới nhất được ưu tiên.
 
-`GET /api/analyses/[id]/cv?format=pdf|docx` tải file đã áp dụng cả gợi ý lẫn chỗ sửa tay. Phần xuất không gọi AI:
+`GET /api/analyses/[id]/cv?format=pdf|docx` tải file đã áp dụng cả gợi ý lẫn chỗ sửa tay.
+
+Trên cùng trang có khung "Đánh giá lại CV đã sửa". `resumeFromDocument` ([document.ts](src/lib/export/document.ts)) ghi từng dòng của CV đã sửa trở lại đúng trường dữ liệu, không qua AI, rồi khung này có hai lựa chọn:
+- **Chấm lại điểm ATS:** server action `rescoreCv` chấm bằng code với cùng JD và cùng thị trường. Không tốn phí, không trừ lượt.
+- **Phân tích lại bằng AI:** gọi `POST /api/analyze` với `from=<id>`.
+  - Không đọc lại CV hay JD: CV đã sửa được lưu thành phiên bản tiếp theo của CV gốc, JD dùng lại bản đã đọc, nên chỉ chạy bước phân tích.
+  - Bản phân tích mới gắn `parent_id` với bản cũ; trang kết quả hiện điểm so với lần trước, Lịch sử gắn nhãn "Đánh giá lại".
+  - Trừ 1 lượt như phân tích mới, trừ khi CV không đổi: khi đó cache trả lại kết quả cũ.
+
+Phần xuất không gọi AI:
 
 1. [revise.ts](src/lib/export/revise.ts) thay các dòng đã chấp nhận vào CV đã parse. Dòng gốc được tìm theo vị trí AI trả về; nếu không khớp thì tìm theo nội dung. Gợi ý không tìm thấy dòng gốc sẽ được báo lại, không bị chèn bừa.
 2. [document.ts](src/lib/export/document.ts) dựng bố cục chung, dùng tiêu đề mục theo ngôn ngữ của CV.

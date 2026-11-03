@@ -27,6 +27,9 @@ function Item({ item, locale, dict }: { item: AnalysisListItem; locale: Locale; 
     <>
       <div className="min-w-0">
         <p className="truncate font-medium">
+          {item.revised && (
+            <span className="mr-2 rounded-full bg-soft px-2 py-0.5 text-xs font-medium text-primary">{dict.revised}</span>
+          )}
           {item.jobTitle ?? dict.untitledJob}
           {item.company && <span className="font-normal text-subtle"> · {item.company}</span>}
         </p>

@@ -77,7 +77,7 @@ export async function findCachedAnalysis(userId: string, cacheKey: string): Prom
  */
 export function reserveAnalysis(
   userId: string,
-  run: { cacheKey: string; uiLocale: Locale; promptVersions: string[] },
+  run: { cacheKey: string; uiLocale: Locale; promptVersions: string[]; parentId?: string },
 ): Promise<{ id: string } | { quota: QuotaStatus }> {
   return getDb().transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
@@ -154,6 +154,35 @@ export async function loadOrParseResume(
   return { id, value: output };
 }
 
+/**
+ * Stores a resume derived from an earlier version (suggestions and hand edits applied)
+ * as the next version of the same resume, or reuses an identical one.
+ */
+export function saveRevisedResume(fromVersionId: string, parsed: Resume, contentHash: string): Promise<Stored<Resume>> {
+  return getDb().transaction(async (tx) => {
+    const [source] = await tx
+      .select({ resumeId: resumeVersions.resumeId })
+      .from(resumeVersions)
+      .where(eq(resumeVersions.id, fromVersionId));
+    const [existing] = await tx
+      .select({ id: resumeVersions.id })
+      .from(resumeVersions)
+      .where(and(eq(resumeVersions.resumeId, source.resumeId), eq(resumeVersions.contentHash, contentHash)))
+      .limit(1);
+    if (existing) return { id: existing.id, value: parsed };
+
+    const [{ next }] = await tx
+      .select({ next: sql<number>`coalesce(max(${resumeVersions.version}), 0) + 1` })
+      .from(resumeVersions)
+      .where(eq(resumeVersions.resumeId, source.resumeId));
+    const [version] = await tx
+      .insert(resumeVersions)
+      .values({ resumeId: source.resumeId, version: next, source: "suggestions", contentHash, parsed })
+      .returning({ id: resumeVersions.id });
+    return { id: version.id, value: parsed };
+  });
+}
+
 /** JDs are shared across users: one parse per distinct JD text and prompt version. */
 export async function loadOrParseJob(
   jdText: string,
@@ -205,6 +234,8 @@ export interface AnalysisListItem {
   jobTitle: string | null;
   company: string | null;
   resumeTitle: string | null;
+  /** Re-evaluates the revised CV of an earlier analysis. */
+  revised: boolean;
 }
 
 export async function listAnalyses(userId: string, limit = 50): Promise<AnalysisListItem[]> {
@@ -216,6 +247,7 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
       ats: analyses.ats,
       job: jobDescriptions.parsed,
       resumeTitle: resumes.title,
+      parentId: analyses.parentId,
     })
     .from(analyses)
     .leftJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
@@ -233,6 +265,7 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
     jobTitle: row.job?.title ?? null,
     company: row.job?.company ?? null,
     resumeTitle: row.resumeTitle,
+    revised: row.parentId !== null,
   }));
 }
 
@@ -245,6 +278,7 @@ export async function getAnalysisReport(
   const [row] = await db
     .select({
       id: analyses.id,
+      parentId: analyses.parentId,
       market: analyses.market,
       ats: analyses.ats,
       result: analyses.result,
@@ -257,7 +291,7 @@ export async function getAnalysisReport(
     .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
   if (!row?.ats || !row.result || !row.market) return null;
 
-  const [bulletRows, [summary], [cost]] = await Promise.all([
+  const [bulletRows, [summary], [cost], [parent]] = await Promise.all([
     db
       .select({
         index: suggestionDecisions.suggestionIndex,
@@ -271,6 +305,12 @@ export async function getAnalysisReport(
       .from(summaryDecisions)
       .where(eq(summaryDecisions.analysisId, analysisId)),
     db.select({ total: sum(aiUsage.costUsd) }).from(aiUsage).where(eq(aiUsage.analysisId, analysisId)),
+    row.parentId
+      ? db
+          .select({ id: analyses.id, ats: analyses.ats })
+          .from(analyses)
+          .where(and(eq(analyses.id, row.parentId), eq(analyses.userId, userId)))
+      : Promise.resolve([]),
   ]);
 
   return {
@@ -282,6 +322,7 @@ export async function getAnalysisReport(
       ats: row.ats,
       analysis: row.result,
       costUsd: Number(cost?.total ?? 0),
+      previous: parent?.ats ? { id: parent.id, overall: parent.ats.overall } : null,
     },
     choices: {
       bullets: Object.fromEntries(bulletRows.map(({ index, decision, text }) => [index, { decision, text }])),

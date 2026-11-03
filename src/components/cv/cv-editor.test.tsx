@@ -7,7 +7,8 @@ import { makeAnalysis, makeResume } from "@/test/fixtures";
 import { CvEditor } from "./cv-editor";
 
 vi.mock("./cv-font", () => ({ cvFont: { className: "cv-font" } }));
-vi.mock("@/lib/export/actions", () => ({ saveCvEdit: vi.fn() }));
+vi.mock("@/lib/export/actions", () => ({ saveCvEdit: vi.fn(), rescoreCv: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 function render(edits: CvEdits) {
   const analysis = makeAnalysis();
@@ -24,7 +25,10 @@ function render(edits: CvEdits) {
       appliedCount={revision.changed.size}
       unplacedCount={0}
       showPhotoNote={false}
+      locale="vi"
+      quota={{ used: 1, limit: 3 }}
       dict={viDict.cv}
+      analyzeDict={viDict.analyze}
     />,
   ).replaceAll("<!-- -->", "");
 }
@@ -37,6 +41,8 @@ describe("CvEditor", () => {
     expect(html).toContain("Còn 1 dòng có chỗ trống");
     expect(html).toContain("bg-emerald-100");
     expect(html).toContain('href="/api/analyses/00000000-0000-4000-8000-000000000000/cv?format=pdf"');
+    expect(html).toContain(viDict.cv.rescore);
+    expect(html).toContain("trừ 1 lượt (còn 2/3 lượt tháng này)");
   });
 
   it("shows hand edits, removed lines and the gaps they filled", () => {

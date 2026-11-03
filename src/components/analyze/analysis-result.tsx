@@ -98,6 +98,8 @@ interface Props {
   newAnalysisHref: string;
   /** Page that previews and downloads the resume with the accepted suggestions. */
   exportHref: string;
+  /** The analysis this one re-evaluates, when there is one. */
+  previousHref?: string;
   initialChoices?: Choices;
   /** Called after each accept/skip/edit/undo so the choice can be saved. */
   onChoiceChange?: (target: SuggestionTarget, choice: Choice | null) => void;
@@ -108,6 +110,7 @@ export function AnalysisResult({
   dict: analyzeDict,
   newAnalysisHref,
   exportHref,
+  previousHref,
   initialChoices = NO_CHOICES,
   onChoiceChange,
 }: Props) {
@@ -148,6 +151,23 @@ export function AnalysisResult({
               {report.market === "vn" ? dict.marketVn : dict.marketIntl}
             </span>
           </div>
+          {report.previous && (
+            <p className="text-sm">
+              {format(dict.previousScore, { before: report.previous.overall, after: ats.overall })}{" "}
+              <span className={ats.overall >= report.previous.overall ? "font-semibold text-success" : "font-semibold text-danger"}>
+                ({ats.overall >= report.previous.overall ? "+" : ""}
+                {ats.overall - report.previous.overall})
+              </span>
+              {previousHref && (
+                <>
+                  {" · "}
+                  <Link href={previousHref} className="text-primary hover:underline">
+                    {dict.viewPrevious}
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
           <p className="text-sm leading-relaxed">{analysis.verdict}</p>
           <dl className="mt-2 grid gap-2.5">
             {(Object.keys(COMPONENT_WEIGHTS) as AtsComponentKey[]).map((key) => {

@@ -1,3 +1,4 @@
+import type { Resume } from "@/lib/ai/schemas/resume";
 import { SUMMARY_LINE, lineKey, type Revision } from "./revise";
 
 export type CvLanguage = "vi" | "en";
@@ -248,6 +249,92 @@ export function pruneEmpty(doc: CvDocument): CvDocument {
     }))
     .filter((section) => section.entries.length > 0);
   return { ...doc, contact: filled(doc.contact), sections };
+}
+
+function splitDates(text: string, present: string) {
+  const [start, end] = text.split(/\s+[–-]\s+/, 2).map((part) => part.trim() || null);
+  const isCurrent = end?.toLowerCase() === present.toLowerCase();
+  return { start_date: start ?? null, end_date: isCurrent ? null : (end ?? null), is_current: isCurrent };
+}
+
+/**
+ * The inverse of buildCvDocument: `base` with the document's text written back to the
+ * fields it came from, so the CV as previewed and exported can be scored and analyzed.
+ * Joined fields ("company, location", "start – end") are only rewritten when edited.
+ */
+export function resumeFromDocument(base: Resume, doc: CvDocument): Resume {
+  const resume = structuredClone(base);
+  const labels = LABELS[doc.language];
+  const value = (text: CvText) => text.text.trim() || null;
+  const filled = (texts: CvText[]) => texts.map((text) => text.text.trim()).filter(Boolean);
+
+  resume.full_name = value(doc.name);
+  resume.headline = value(doc.headline);
+  const contact = new Map(doc.contact.map((text) => [text.key, text]));
+  const field = (key: string, current: string | null) => (contact.has(key) ? value(contact.get(key)!) : current);
+  resume.email = field("contact.email", resume.email);
+  resume.phone = field("contact.phone", resume.phone);
+  resume.location = field("contact.location", resume.location);
+  resume.links = resume.links.flatMap((link, i) => {
+    const text = contact.get(`contact.link.${i}`);
+    if (!text?.edited) return [link];
+    return text.text.trim() ? [{ ...link, url: text.text.trim() }] : [];
+  });
+
+  for (const section of doc.sections) {
+    const [first] = section.entries;
+    if (section.key === "summary") resume.summary = filled(first.paragraphs).join("\n") || null;
+    if (section.key === "skills") resume.skills = (first.paragraphs[0]?.text ?? "").split(/\s*,\s*/).filter(Boolean);
+    if (section.key === "certifications") resume.certifications = filled(first.bullets);
+    if (section.key === "languages") {
+      resume.languages = (first.paragraphs[0]?.text ?? "")
+        .split(/\s*,\s*(?![^()]*\))/)
+        .filter(Boolean)
+        .map((item) => {
+          const match = /^(.*?)\s*\((.*)\)$/.exec(item);
+          return match ? { language: match[1], proficiency: match[2] } : { language: item, proficiency: null };
+        });
+    }
+    if (section.key.startsWith("other.")) {
+      const other = resume.other_sections[Number(section.key.split(".")[1])];
+      if (other) other.content = filled(first.paragraphs).join("\n");
+    }
+
+    section.entries.forEach((entry, i) => {
+      if (section.key === "experience" && resume.experiences[i]) {
+        const job = resume.experiences[i];
+        job.title = entry.title.text.trim();
+        if (entry.subtitle.edited) [job.company, job.location] = [entry.subtitle.text.trim(), null];
+        if (entry.dates.edited) Object.assign(job, splitDates(entry.dates.text, labels.present));
+        job.bullets = filled(entry.bullets);
+      }
+      if (section.key === "projects" && resume.projects[i]) {
+        const project = resume.projects[i];
+        const descriptionLines = lines(project.description).length;
+        project.name = entry.title.text.trim();
+        project.role = value(entry.subtitle);
+        project.description = filled(entry.paragraphs.slice(0, descriptionLines)).join("\n") || null;
+        const technologies = entry.paragraphs[descriptionLines];
+        if (technologies?.edited) {
+          project.technologies = technologies.text.replace(/^[^:]*:\s*/, "").split(/\s*,\s*/).filter(Boolean);
+        }
+        project.bullets = filled(entry.bullets);
+      }
+      if (section.key === "education" && resume.education[i]) {
+        const school = resume.education[i];
+        school.school = entry.title.text.trim();
+        if (entry.subtitle.edited) [school.degree, school.field] = [value(entry.subtitle), null];
+        if (entry.dates.edited) {
+          const { start_date, end_date } = splitDates(entry.dates.text, labels.present);
+          [school.start_date, school.end_date] = [start_date, end_date];
+        }
+        if (entry.paragraphs[0]?.edited) school.gpa = entry.paragraphs[0].text.replace(/^GPA:\s*/i, "").trim() || null;
+      }
+    });
+  }
+
+  // The exported CV never carries a photo or a date of birth.
+  return { ...resume, has_photo: false, has_date_of_birth: false };
 }
 
 function ascii(text: string): string {

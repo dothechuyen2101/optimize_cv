@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { format, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
-import type { AnalysisErrorCode, AnalysisEvent, AnalysisStage } from "@/lib/analysis/types";
+import { requestAnalysis } from "@/lib/analysis/request";
+import type { AnalysisErrorCode, AnalysisStage } from "@/lib/analysis/types";
 import { hasQuotaLeft, type QuotaStatus } from "@/lib/billing/quota";
 import { AnalyzeForm, type AnalyzeFormValues } from "./analyze-form";
 
@@ -12,23 +13,6 @@ type State =
   | { status: "idle"; error?: AnalysisErrorCode }
   | { status: "running"; stage: AnalysisStage | null }
   | { status: "opening" };
-
-async function* readEvents(body: ReadableStream<Uint8Array>): AsyncGenerator<AnalysisEvent> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let newline: number;
-    while ((newline = buffer.indexOf("\n")) >= 0) {
-      const line = buffer.slice(0, newline).trim();
-      buffer = buffer.slice(newline + 1);
-      if (line) yield JSON.parse(line) as AnalysisEvent;
-    }
-  }
-}
 
 interface Props {
   locale: Locale;
@@ -49,30 +33,13 @@ export function AnalyzeWorkspace({ locale, dict, quota }: Props) {
     body.set("market", values.market);
     body.set("lang", locale);
 
-    try {
-      const response = await fetch("/api/analyze", { method: "POST", body });
-      if (!response.ok || !response.body) {
-        const event = (await response.json().catch(() => null)) as AnalysisEvent | null;
-        setState({ status: "idle", error: event?.type === "error" ? event.code : "server" });
-        return;
-      }
-      for await (const event of readEvents(response.body)) {
-        if (event.type === "stage") {
-          setState({ status: "running", stage: event.stage });
-        } else if (event.type === "result") {
-          setState({ status: "opening" });
-          router.push(`/${locale}/analyses/${event.analysisId}`);
-          return;
-        } else {
-          setState({ status: "idle", error: event.code });
-          return;
-        }
-      }
-      // The stream closed without a result, e.g. the function timed out.
-      setState({ status: "idle", error: "server" });
-    } catch {
-      setState({ status: "idle", error: "server" });
+    const outcome = await requestAnalysis(body, (stage) => setState({ status: "running", stage }));
+    if ("error" in outcome) {
+      setState({ status: "idle", error: outcome.error });
+      return;
     }
+    setState({ status: "opening" });
+    router.push(`/${locale}/analyses/${outcome.analysisId}`);
   }
 
   return (
