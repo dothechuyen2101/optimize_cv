@@ -32,6 +32,7 @@ function render(report: AnalysisReport, dict = viDict.analyze, initialChoices = 
       dict={dict}
       newAnalysisHref="/vi/analyze"
       exportHref="/vi/analyses/x/cv"
+      reuploadHref="/vi/analyze?from=x"
       initialChoices={initialChoices}
     />,
   );
@@ -96,6 +97,7 @@ describe("AnalysisResult", () => {
         dict={viDict.analyze}
         newAnalysisHref="/vi/analyze"
         exportHref="/vi/analyses/x/cv"
+        reuploadHref="/vi/analyze?from=x"
         previousHref="/vi/analyses/prev"
       />,
     ).replaceAll("<!-- -->", "");

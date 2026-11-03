@@ -19,6 +19,16 @@ export interface AnalysisReport {
   previous: { id: string; overall: number } | null;
 }
 
+/** The JD of one of the user's analyses, to analyze another CV (e.g. a revised one) against. */
+export interface SavedJob {
+  /** The analysis it comes from; a new analysis with the same JD is compared with it. */
+  analysisId: string;
+  jd: string;
+  market: "auto" | "vn" | "international";
+  title: string | null;
+  company: string | null;
+}
+
 export type Decision = "accepted" | "rejected";
 
 /** The user's call on one suggestion; `text` is their own wording of it, null to keep the AI's. */

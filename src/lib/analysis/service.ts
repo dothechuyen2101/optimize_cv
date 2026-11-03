@@ -22,7 +22,14 @@ import { parseJd } from "@/lib/ai/steps/parse-jd";
 import { PLAN_ANALYSIS_LIMITS, STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
 import type { CvUpload } from "@/lib/parsing/cv-document";
 import type { AnalysisOutcome, Stored } from "./run-analysis";
-import { MAX_SUGGESTION_TEXT, type AnalysisReport, type Choice, type Choices, type SuggestionTarget } from "./types";
+import {
+  MAX_SUGGESTION_TEXT,
+  type AnalysisReport,
+  type Choice,
+  type Choices,
+  type SavedJob,
+  type SuggestionTarget,
+} from "./types";
 
 // Every function takes the signed-in user's id and scopes its queries to it:
 // the database connection bypasses RLS.
@@ -267,6 +274,61 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
     resumeTitle: row.resumeTitle,
     revised: row.parentId !== null,
   }));
+}
+
+/** JDs the user has analyzed against, latest use first, one entry per JD, each with its latest analysis. */
+export async function listSavedJobs(
+  userId: string,
+  limit = 20,
+): Promise<{ analysisId: string; title: string | null; company: string | null; usedAt: Date }[]> {
+  const rows = await getDb()
+    .select({
+      analysisId: analyses.id,
+      jobId: analyses.jobDescriptionId,
+      usedAt: analyses.createdAt,
+      job: jobDescriptions.parsed,
+    })
+    .from(analyses)
+    .innerJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
+    .where(and(eq(analyses.userId, userId), eq(analyses.status, "completed")))
+    .orderBy(desc(analyses.createdAt))
+    .limit(200);
+
+  const seen = new Set<string | null>();
+  return rows
+    .filter((row) => !seen.has(row.jobId) && Boolean(seen.add(row.jobId)))
+    .slice(0, limit)
+    .map((row) => ({ analysisId: row.analysisId, title: row.job.title, company: row.job.company, usedAt: row.usedAt }));
+}
+
+/** The JD of the user's own analysis. JD rows are shared, so they are only reachable through an owned analysis. */
+export async function getSavedJob(userId: string, analysisId: string): Promise<SavedJob | null> {
+  if (!isUuid(analysisId)) return null;
+  const [row] = await getDb()
+    .select({ jd: jobDescriptions.rawText, job: jobDescriptions.parsed, market: analyses.market })
+    .from(analyses)
+    .innerJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
+    .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
+  if (!row) return null;
+  return { analysisId, jd: row.jd, market: row.market ?? "auto", title: row.job.title, company: row.job.company };
+}
+
+/** `analysisId` when it is the user's completed analysis of the JD with this hash, so a new upload can be compared with it. */
+export async function sameJobAnalysis(userId: string, analysisId: string, jdHash: string): Promise<string | null> {
+  if (!isUuid(analysisId)) return null;
+  const [row] = await getDb()
+    .select({ id: analyses.id })
+    .from(analyses)
+    .innerJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
+    .where(
+      and(
+        eq(analyses.id, analysisId),
+        eq(analyses.userId, userId),
+        eq(analyses.status, "completed"),
+        eq(jobDescriptions.contentHash, jdHash),
+      ),
+    );
+  return row?.id ?? null;
 }
 
 export async function getAnalysisReport(

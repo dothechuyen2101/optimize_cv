@@ -223,8 +223,15 @@
       "exportEmpty": "Accept suggestions above, then preview and download the revised resume as PDF or Word.",
       "exportCta": "Preview and download",
       "previousScore": "Compared with the previous evaluation: {before} → {after}",
-      "viewPrevious": "View previous"
-    }
+      "viewPrevious": "View previous",
+      "reupload": "Upload a revised CV for this JD"
+    },
+    "savedJobs": "Saved JDs",
+    "savedJobsPlaceholder": "Pick a JD you analyzed before…",
+    "savedJobUntitled": "Untitled JD",
+    "savedJobLoading": "Loading the JD…",
+    "savedJobFailed": "Couldn't load this JD. Try again or paste the JD below.",
+    "comparingWith": "Using a saved JD: {job}. If you keep the JD as it is, the result is compared with the previous analysis."
   },
   "cv": {
     "title": "Revised resume",
@@ -264,6 +271,8 @@
     "scoreLabel": "ATS score",
     "unchanged": "no change",
     "rescoreNote": "The ATS score is computed by code, against the same JD and criteria as the first time. For a new verdict and suggestions, re-analyze with AI.",
-    "rescoreFailed": "Couldn't rescore. Please try again."
+    "rescoreFailed": "Couldn't rescore. Please try again.",
+    "reuploadHint": "Downloaded the resume and edited it in Word or elsewhere?",
+    "reupload": "Upload the revised CV for this JD"
   }
 }

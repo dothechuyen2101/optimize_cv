@@ -14,6 +14,7 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Xuất CV đã chỉnh sửa: xem trước, tải PDF và DOCX theo mẫu ATS một cột | Xong |
 | Sửa tay mọi dòng của CV (tên, liên hệ, ngày tháng, bullet…) trên trang xem trước | Xong |
 | Đánh giá lại CV đã sửa: chấm lại điểm ATS miễn phí, hoặc phân tích lại bằng AI (trừ 1 lượt) kèm so sánh điểm trước/sau | Xong |
+| JD đã lưu: chọn lại JD cũ khi phân tích, upload CV sửa bằng Word với cùng JD và so sánh với lần trước | Xong |
 | Đọc CV chính xác: dùng lớp text của PDF, đối chiếu từng trường, dùng model mạnh cho CV dạng ảnh | Xong |
 | Quota gói free: 3 lượt/tháng (UTC) | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
@@ -101,6 +102,11 @@ Trên cùng trang có khung "Đánh giá lại CV đã sửa". `resumeFromDocume
   - Không đọc lại CV hay JD: CV đã sửa được lưu thành phiên bản tiếp theo của CV gốc, JD dùng lại bản đã đọc, nên chỉ chạy bước phân tích.
   - Bản phân tích mới gắn `parent_id` với bản cũ; trang kết quả hiện điểm so với lần trước, Lịch sử gắn nhãn "Đánh giá lại".
   - Trừ 1 lượt như phân tích mới, trừ khi CV không đổi: khi đó cache trả lại kết quả cũ.
+
+**JD đã lưu.** Mỗi JD đã phân tích đều được lưu sẵn. Bảng `job_descriptions` dùng chung giữa các user, nên user chỉ đọc được JD thông qua bản phân tích của chính mình.
+- Trang `/[lang]/analyze` có ô chọn "JD đã lưu"; chọn một JD thì điền sẵn nội dung và thị trường.
+- `/[lang]/analyze?from=<id>` mở form với JD của bản phân tích đó. Trang CV và trang kết quả có nút "Upload CV đã sửa với JD này" dẫn tới đây, dành cho CV đã tải về và sửa bằng Word.
+- Form gửi kèm `parent=<id>`. Server gắn `parent_id` chỉ khi đó là bản phân tích của user và JD giữ nguyên (so hash). Khi đó trang kết quả hiện điểm so với lần trước.
 
 Phần xuất không gọi AI:
 

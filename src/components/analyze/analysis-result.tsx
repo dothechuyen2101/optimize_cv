@@ -100,6 +100,8 @@ interface Props {
   exportHref: string;
   /** The analysis this one re-evaluates, when there is one. */
   previousHref?: string;
+  /** The analyze form with this JD filled in, to upload a CV revised outside the app. */
+  reuploadHref: string;
   initialChoices?: Choices;
   /** Called after each accept/skip/edit/undo so the choice can be saved. */
   onChoiceChange?: (target: SuggestionTarget, choice: Choice | null) => void;
@@ -111,6 +113,7 @@ export function AnalysisResult({
   newAnalysisHref,
   exportHref,
   previousHref,
+  reuploadHref,
   initialChoices = NO_CHOICES,
   onChoiceChange,
 }: Props) {
@@ -282,12 +285,20 @@ export function AnalysisResult({
             {changeCount > 0 ? format(dict.exportBody, { count: changeCount }) : dict.exportEmpty}
           </p>
         </div>
-        <Link
-          href={exportHref}
-          className="shrink-0 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-fg hover:opacity-90"
-        >
-          {dict.exportCta}
-        </Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link
+            href={reuploadHref}
+            className="rounded-lg border border-line bg-card px-4 py-2.5 text-center text-sm font-medium hover:bg-soft"
+          >
+            {dict.reupload}
+          </Link>
+          <Link
+            href={exportHref}
+            className="rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-fg hover:opacity-90"
+          >
+            {dict.exportCta}
+          </Link>
+        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">

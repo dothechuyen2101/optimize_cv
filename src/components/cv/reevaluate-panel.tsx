@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { format, type Locale } from "@/i18n/config";
@@ -125,6 +126,12 @@ export function ReevaluatePanel({ analysisId, locale, quota, hasChanges, blocked
       </div>
       <p className="text-xs text-subtle">
         {blocked ? dict.finishEditing : hasChanges ? quotaNote : dict.noChangesToAnalyze}
+      </p>
+      <p className="border-t border-line pt-4 text-sm">
+        {dict.reuploadHint}{" "}
+        <Link href={`/${locale}/analyze?from=${analysisId}`} className="font-medium text-primary hover:underline">
+          {dict.reupload}
+        </Link>
       </p>
 
       {ai.status === "running" && (

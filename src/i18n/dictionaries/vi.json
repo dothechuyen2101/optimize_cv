@@ -223,8 +223,15 @@
       "exportEmpty": "Chấp nhận các gợi ý ở trên, rồi xem trước và tải CV đã sửa dạng PDF hoặc Word.",
       "exportCta": "Xem và tải CV",
       "previousScore": "So với lần đánh giá trước: {before} → {after}",
-      "viewPrevious": "Xem bản trước"
-    }
+      "viewPrevious": "Xem bản trước",
+      "reupload": "Upload CV đã sửa với JD này"
+    },
+    "savedJobs": "JD đã lưu",
+    "savedJobsPlaceholder": "Chọn một JD bạn đã phân tích trước đây…",
+    "savedJobUntitled": "JD không có tiêu đề",
+    "savedJobLoading": "Đang tải JD…",
+    "savedJobFailed": "Không tải được JD này. Hãy thử lại hoặc dán JD vào ô bên dưới.",
+    "comparingWith": "Đang dùng JD đã lưu: {job}. Nếu giữ nguyên nội dung JD, kết quả sẽ được so với lần phân tích trước."
   },
   "cv": {
     "title": "CV đã chỉnh sửa",
@@ -264,6 +271,8 @@
     "scoreLabel": "Điểm ATS",
     "unchanged": "không đổi",
     "rescoreNote": "Điểm ATS được chấm bằng code, theo cùng JD và tiêu chí như lần đầu. Muốn có nhận định và gợi ý mới, hãy phân tích lại bằng AI.",
-    "rescoreFailed": "Chưa chấm lại được điểm. Hãy thử lại."
+    "rescoreFailed": "Chưa chấm lại được điểm. Hãy thử lại.",
+    "reuploadHint": "Đã tải CV về và sửa bằng Word hoặc công cụ khác?",
+    "reupload": "Upload CV đã sửa với JD này"
   }
 }

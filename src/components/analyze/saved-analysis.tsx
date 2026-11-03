@@ -22,6 +22,7 @@ export function SavedAnalysis({ report, choices, locale, dict }: Props) {
       dict={dict}
       newAnalysisHref={`/${locale}/analyze`}
       exportHref={`/${locale}/analyses/${report.id}/cv`}
+      reuploadHref={`/${locale}/analyze?from=${report.id}`}
       previousHref={report.previous ? `/${locale}/analyses/${report.previous.id}` : undefined}
       initialChoices={choices}
       onChoiceChange={(target, choice) => startTransition(() => saveSuggestionChoice(report.id, target, choice))}

@@ -1,8 +1,8 @@
 "use server";
 
 import { getSessionUser } from "@/lib/auth/session";
-import { setChoice } from "./service";
-import type { Choice, SuggestionTarget } from "./types";
+import { getSavedJob, setChoice } from "./service";
+import type { Choice, SavedJob, SuggestionTarget } from "./types";
 
 function isTarget(value: SuggestionTarget): boolean {
   return value?.kind === "summary" || (value?.kind === "bullet" && Number.isInteger(value.index));
@@ -24,4 +24,11 @@ export async function saveSuggestionChoice(
   const user = await getSessionUser();
   if (!user || !isTarget(target) || !isChoice(choice)) return;
   await setChoice(user.id, analysisId, target, choice);
+}
+
+/** The JD of one of the user's analyses, to fill the analyze form with. */
+export async function loadSavedJob(analysisId: string): Promise<SavedJob | null> {
+  const user = await getSessionUser();
+  if (!user || typeof analysisId !== "string") return null;
+  return getSavedJob(user.id, analysisId);
 }

@@ -5,9 +5,9 @@ import { useState } from "react";
 import { format, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { requestAnalysis } from "@/lib/analysis/request";
-import type { AnalysisErrorCode, AnalysisStage } from "@/lib/analysis/types";
+import type { AnalysisErrorCode, AnalysisStage, SavedJob } from "@/lib/analysis/types";
 import { hasQuotaLeft, type QuotaStatus } from "@/lib/billing/quota";
-import { AnalyzeForm, type AnalyzeFormValues } from "./analyze-form";
+import { AnalyzeForm, type AnalyzeFormValues, type SavedJobOption } from "./analyze-form";
 
 type State =
   | { status: "idle"; error?: AnalysisErrorCode }
@@ -18,9 +18,11 @@ interface Props {
   locale: Locale;
   dict: Dictionary["analyze"];
   quota: QuotaStatus;
+  savedJobs: SavedJobOption[];
+  initialJob: SavedJob | null;
 }
 
-export function AnalyzeWorkspace({ locale, dict, quota }: Props) {
+export function AnalyzeWorkspace({ locale, dict, quota, savedJobs, initialJob }: Props) {
   const router = useRouter();
   const [state, setState] = useState<State>({ status: "idle" });
   const outOfQuota = !hasQuotaLeft(quota);
@@ -32,6 +34,7 @@ export function AnalyzeWorkspace({ locale, dict, quota }: Props) {
     body.set("jd", values.jd);
     body.set("market", values.market);
     body.set("lang", locale);
+    if (values.parent) body.set("parent", values.parent);
 
     const outcome = await requestAnalysis(body, (stage) => setState({ status: "running", stage }));
     if ("error" in outcome) {
@@ -60,6 +63,8 @@ export function AnalyzeWorkspace({ locale, dict, quota }: Props) {
           locked={outOfQuota}
           stage={state.status === "running" ? state.stage : null}
           error={state.status === "idle" ? (state.error ?? (outOfQuota ? "quota_exceeded" : undefined)) : undefined}
+          savedJobs={savedJobs}
+          initialJob={initialJob}
           onSubmit={analyze}
         />
       )}

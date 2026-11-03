@@ -14,6 +14,7 @@ import {
   loadOrParseResume,
   recordUsage,
   reserveAnalysis,
+  sameJobAnalysis,
   saveRevisedResume,
 } from "@/lib/analysis/service";
 import { JD_MAX_CHARS, JD_MIN_CHARS, type AnalysisErrorCode, type AnalysisEvent } from "@/lib/analysis/types";
@@ -86,7 +87,10 @@ interface Prepared {
   parentId?: string;
 }
 
-/** A new analysis: an uploaded CV file and a pasted JD. */
+/**
+ * A new analysis: an uploaded CV file and a pasted JD. With parent=<analysis id> of the same JD,
+ * e.g. a CV revised outside the app and uploaded again, the result is compared with that analysis.
+ */
 async function prepareUpload(userId: string, form: FormData): Promise<Prepared | AnalysisErrorCode> {
   const file = form.get("cv");
   const jdText = String(form.get("jd") ?? "").trim();
@@ -105,10 +109,13 @@ async function prepareUpload(userId: string, form: FormData): Promise<Prepared |
     throw error;
   }
   const jdHash = jdContentHash(jdText);
+  const parent = form.get("parent");
+  const parentId = typeof parent === "string" ? await sameJobAnalysis(userId, parent, jdHash) : null;
   return {
     resumeHash: upload.contentHash,
     jdHash,
     market,
+    parentId: parentId ?? undefined,
     resume: (onUsage) => loadOrParseResume(userId, upload, onUsage),
     job: (onUsage) => loadOrParseJob(jdText, jdHash, onUsage),
   };
@@ -128,7 +135,7 @@ async function prepareReanalysis(userId: string, analysisId: string): Promise<Pr
   };
 }
 
-/** Form fields: lang, plus either cv, jd and market for a new analysis, or from=<analysis id> to re-evaluate. */
+/** Form fields: lang, plus either cv, jd, market and optionally parent for a new analysis, or from=<analysis id> to re-evaluate. */
 export async function POST(request: Request) {
   const user = await getSessionUser();
   if (!user) return fail("unauthorized", 401);
