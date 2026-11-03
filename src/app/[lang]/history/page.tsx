@@ -14,6 +14,23 @@ const SCORE_STYLE = {
   danger: "bg-danger-soft text-danger",
 };
 
+function ScoreChange({ before, after, dict }: { before: number; after: number; dict: Dictionary["history"] }) {
+  const delta = after - before;
+  return (
+    <span className="flex shrink-0 items-center gap-2" title={format(dict.improvement, { before, after })}>
+      <span className="text-sm tabular-nums text-subtle">{before} →</span>
+      <span className={`rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums ${SCORE_STYLE[scoreTone(after)]}`}>
+        {after}
+      </span>
+      <span
+        className={`w-9 text-right text-sm font-semibold tabular-nums ${delta > 0 ? "text-success" : delta < 0 ? "text-danger" : "text-subtle"}`}
+      >
+        {delta > 0 ? `+${delta}` : delta === 0 ? "±0" : delta}
+      </span>
+    </span>
+  );
+}
+
 function Item({ item, locale, dict }: { item: AnalysisListItem; locale: Locale; dict: Dictionary["history"] }) {
   // Most users are in Vietnam; show their wall-clock time on both locales.
   const when = new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-GB", {
@@ -38,7 +55,9 @@ function Item({ item, locale, dict }: { item: AnalysisListItem; locale: Locale; 
           {item.resumeTitle && ` · ${item.resumeTitle}`}
         </p>
       </div>
-      {done && item.overall !== null ? (
+      {done && item.overall !== null && item.previousOverall !== null ? (
+        <ScoreChange before={item.previousOverall} after={item.overall} dict={dict} />
+      ) : done && item.overall !== null ? (
         <span
           className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums ${SCORE_STYLE[scoreTone(item.overall)]}`}
           title={dict.score}

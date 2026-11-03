@@ -1,5 +1,6 @@
 import "server-only";
 import { and, count, desc, eq, gt, gte, or, sql, sum } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { getDb } from "@/db";
 import {
   aiUsage,
@@ -243,9 +244,12 @@ export interface AnalysisListItem {
   resumeTitle: string | null;
   /** Re-evaluates the revised CV of an earlier analysis. */
   revised: boolean;
+  /** That earlier analysis's score, to show the improvement. */
+  previousOverall: number | null;
 }
 
 export async function listAnalyses(userId: string, limit = 50): Promise<AnalysisListItem[]> {
+  const parent = alias(analyses, "parent");
   const rows = await getDb()
     .select({
       id: analyses.id,
@@ -255,8 +259,10 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
       job: jobDescriptions.parsed,
       resumeTitle: resumes.title,
       parentId: analyses.parentId,
+      parentAts: parent.ats,
     })
     .from(analyses)
+    .leftJoin(parent, and(eq(parent.id, analyses.parentId), eq(parent.userId, userId)))
     .leftJoin(jobDescriptions, eq(jobDescriptions.id, analyses.jobDescriptionId))
     .leftJoin(resumeVersions, eq(resumeVersions.id, analyses.resumeVersionId))
     .leftJoin(resumes, eq(resumes.id, resumeVersions.resumeId))
@@ -273,6 +279,7 @@ export async function listAnalyses(userId: string, limit = 50): Promise<Analysis
     company: row.job?.company ?? null,
     resumeTitle: row.resumeTitle,
     revised: row.parentId !== null,
+    previousOverall: row.parentAts?.overall ?? null,
   }));
 }
 

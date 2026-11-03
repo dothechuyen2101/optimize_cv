@@ -74,7 +74,8 @@
     },
     "untitledJob": "JD chưa đọc được",
     "back": "Lịch sử",
-    "revised": "Đánh giá lại"
+    "revised": "Đánh giá lại",
+    "improvement": "Lần trước {before} điểm, lần này {after} điểm"
   },
   "home": {
     "eyebrow": "Dành cho ứng viên Việt Nam và quốc tế",

@@ -74,7 +74,8 @@
     },
     "untitledJob": "JD not parsed",
     "back": "History",
-    "revised": "Re-evaluation"
+    "revised": "Re-evaluation",
+    "improvement": "Previously {before}, now {after}"
   },
   "home": {
     "eyebrow": "For candidates in Vietnam and worldwide",

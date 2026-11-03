@@ -100,7 +100,7 @@ Trên cùng trang có khung "Đánh giá lại CV đã sửa". `resumeFromDocume
 - **Chấm lại điểm ATS:** server action `rescoreCv` chấm bằng code với cùng JD và cùng thị trường. Không tốn phí, không trừ lượt.
 - **Phân tích lại bằng AI:** gọi `POST /api/analyze` với `from=<id>`.
   - Không đọc lại CV hay JD: CV đã sửa được lưu thành phiên bản tiếp theo của CV gốc, JD dùng lại bản đã đọc, nên chỉ chạy bước phân tích.
-  - Bản phân tích mới gắn `parent_id` với bản cũ; trang kết quả hiện điểm so với lần trước, Lịch sử gắn nhãn "Đánh giá lại".
+  - Bản phân tích mới gắn `parent_id` với bản cũ. Trang kết quả hiện điểm so với lần trước; Lịch sử gắn nhãn "Đánh giá lại" và hiện mức thay đổi điểm (ví dụ `73 → 96 +23`).
   - Trừ 1 lượt như phân tích mới, trừ khi CV không đổi: khi đó cache trả lại kết quả cũ.
 
 **JD đã lưu.** Mỗi JD đã phân tích đều được lưu sẵn. Bảng `job_descriptions` dùng chung giữa các user, nên user chỉ đọc được JD thông qua bản phân tích của chính mình.
