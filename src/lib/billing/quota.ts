@@ -6,6 +6,12 @@ export const PLAN_ANALYSIS_LIMITS: Record<Plan, number | null> = {
   pro: null,
 };
 
+/** Practice interview sessions per calendar month (UTC). */
+export const PLAN_INTERVIEW_LIMITS: Record<Plan, number | null> = {
+  free: 2,
+  pro: null,
+};
+
 /** A run still "running" after this long crashed; it stops holding quota. */
 export const STALE_RUN_MS = 15 * 60 * 1000;
 

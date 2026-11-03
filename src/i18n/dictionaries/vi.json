@@ -9,7 +9,8 @@
     "history": "Lịch sử",
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
-    "switchTo": "English"
+    "switchTo": "English",
+    "interviews": "Phỏng vấn"
   },
   "auth": {
     "login": {
@@ -275,5 +276,116 @@
     "rescoreFailed": "Chưa chấm lại được điểm. Hãy thử lại.",
     "reuploadHint": "Đã tải CV về và sửa bằng Word hoặc công cụ khác?",
     "reupload": "Upload CV đã sửa với JD này"
+  },
+  "nextSteps": {
+    "title": "Bước tiếp theo",
+    "role": "Phân tích role",
+    "roleBody": "Giải mã JD: role thực chất làm gì, các vòng phỏng vấn thường gặp và câu hỏi để luyện.",
+    "interview": "Luyện phỏng vấn",
+    "interviewBody": "Phỏng vấn thử bằng chat với AI theo CV và JD này, có nhận xét và chấm điểm."
+  },
+  "role": {
+    "title": "Phân tích role",
+    "subtitle": "Giải mã JD: role thực chất làm gì, yêu cầu nào bắt buộc, các vòng phỏng vấn thường gặp và câu hỏi để luyện.",
+    "back": "Quay lại kết quả phân tích",
+    "generate": "Tạo phân tích role",
+    "generating": "Đang phân tích role, thường mất 30–60 giây…",
+    "generateNote": "Miễn phí, tạo một lần cho mỗi lần phân tích CV, dựa trên JD và CV của bạn.",
+    "running": "Phân tích role đang được tạo. Hãy tải lại trang sau ít phút.",
+    "failed": "Lần tạo trước bị lỗi. Bạn có thể thử lại.",
+    "summary": "Role này thực chất là gì",
+    "responsibilities": "Công việc thực tế",
+    "mustHave": "Yêu cầu bắt buộc",
+    "niceToHave": "Yêu cầu ưu tiên",
+    "evidence": "Trong JD",
+    "seniority": "Cấp độ",
+    "unknowns": "JD chưa nói rõ, nên hỏi thêm",
+    "rounds": "Các vòng phỏng vấn thường gặp",
+    "roundsNote": "Đây là quy trình thường gặp với role tương tự, không phải thông tin của công ty.",
+    "practice": "Câu hỏi luyện tập",
+    "whyAsked": "Nhà tuyển dụng muốn biết",
+    "answerTips": "Gợi ý trả lời",
+    "category": {
+      "behavioral": "Hành vi",
+      "technical": "Kỹ thuật",
+      "role": "Chuyên môn",
+      "hr": "HR"
+    },
+    "yourAngle": "Lợi thế của bạn",
+    "strengths": "Điểm mạnh nên nhấn mạnh",
+    "gapsToPrepare": "Khoảng trống cần chuẩn bị câu trả lời",
+    "questionsToAsk": "Câu hỏi bạn nên hỏi lại nhà tuyển dụng",
+    "practiceCta": "Luyện phỏng vấn với JD này",
+    "disclaimer": "Phân tích dựa trên JD và CV bạn cung cấp; AI không có thông tin nội bộ của công ty."
+  },
+  "interview": {
+    "listTitle": "Luyện phỏng vấn",
+    "listSubtitle": "Các buổi phỏng vấn thử của bạn, mới nhất ở trên.",
+    "listEmpty": "Bạn chưa có buổi luyện phỏng vấn nào. Hãy mở một lần phân tích CV và chọn Luyện phỏng vấn.",
+    "listStart": "Mở lịch sử phân tích",
+    "active": "Đang diễn ra",
+    "quota": "Tháng này đã dùng {used}/{limit} buổi miễn phí.",
+    "setupTitle": "Luyện phỏng vấn",
+    "setupSubtitle": "Người phỏng vấn AI hỏi từng câu dựa trên CV và JD của lần phân tích này, hỏi vặn khi câu trả lời còn chung chung.",
+    "back": "Quay lại kết quả phân tích",
+    "type": "Loại phỏng vấn",
+    "types": {
+      "behavioral": "Hành vi (STAR)",
+      "technical": "Kỹ thuật",
+      "hr": "HR và động lực",
+      "mixed": "Kết hợp"
+    },
+    "difficulty": "Độ khó",
+    "difficulties": {
+      "easy": "Nhẹ nhàng",
+      "normal": "Thực tế",
+      "hard": "Khó"
+    },
+    "language": "Ngôn ngữ phỏng vấn",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "feedback": "Nhận xét sau mỗi câu trả lời",
+    "feedbackHint": "Tắt nếu muốn trải nghiệm như phỏng vấn thật và chỉ xem nhận xét ở cuối buổi.",
+    "start": "Bắt đầu phỏng vấn",
+    "starting": "Đang chuẩn bị câu hỏi đầu tiên…",
+    "quotaLeft": "Còn {remaining}/{limit} buổi miễn phí tháng này. Khoảng 6 câu hỏi chính, có câu hỏi vặn.",
+    "unlimited": "Khoảng 6 câu hỏi chính, có câu hỏi vặn.",
+    "interviewer": "Người phỏng vấn",
+    "you": "Bạn",
+    "placeholder": "Nhập câu trả lời của bạn…",
+    "inputHint": "Ctrl + Enter để gửi.",
+    "send": "Gửi",
+    "thinking": "Người phỏng vấn đang suy nghĩ…",
+    "finish": "Kết thúc và chấm điểm",
+    "finishing": "Đang chấm điểm buổi phỏng vấn, thường mất 30–60 giây…",
+    "closed": "Buổi phỏng vấn đã kết thúc.",
+    "feedbackTitle": "Nhận xét",
+    "score": "{score}/5",
+    "good": "Tốt",
+    "improve": "Cần cải thiện",
+    "betterAnswer": "Gợi ý trả lời tốt hơn",
+    "reportTitle": "Kết quả buổi phỏng vấn",
+    "overall": "Điểm tổng",
+    "rubric": {
+      "structure": "Cấu trúc",
+      "relevance": "Đúng trọng tâm",
+      "evidence": "Dẫn chứng",
+      "communication": "Diễn đạt"
+    },
+    "perQuestion": "Từng câu hỏi",
+    "topImprovements": "Ưu tiên cải thiện",
+    "strongest": "Điểm sáng",
+    "improvedAnswer": "Câu trả lời yếu nhất, viết lại",
+    "transcript": "Toàn bộ buổi phỏng vấn",
+    "again": "Luyện thêm một buổi",
+    "errors": {
+      "quota_exceeded": "Bạn đã dùng hết buổi luyện phỏng vấn miễn phí của tháng này.",
+      "interview_over": "Buổi phỏng vấn đã kết thúc.",
+      "answer_empty": "Hãy nhập câu trả lời.",
+      "answer_too_long": "Câu trả lời quá dài, tối đa 4000 ký tự.",
+      "no_answers": "Hãy trả lời ít nhất một câu trước khi chấm điểm."
+    }
   }
 }

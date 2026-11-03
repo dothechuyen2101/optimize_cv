@@ -18,7 +18,9 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Đọc CV chính xác: dùng lớp text của PDF, đối chiếu từng trường, dùng model mạnh cho CV dạng ảnh | Xong |
 | Quota gói free: 3 lượt/tháng (UTC) | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
-| Phân tích role, review portfolio, luyện phỏng vấn chat/voice, thanh toán | Chưa làm (Phase 2–5) |
+| Phân tích role: giải mã JD, yêu cầu bắt buộc/ưu tiên, vòng phỏng vấn, câu hỏi luyện tập (miễn phí, 1 lần mỗi phân tích CV) | Xong |
+| Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (free 2 buổi/tháng) | Xong |
+| Review portfolio, phỏng vấn voice realtime, thanh toán | Chưa làm (Phase 3–5) |
 
 ## Chạy local
 
@@ -116,6 +118,23 @@ Phần xuất không gọi AI:
 
 PDF nhúng font Be Vietnam Pro (giấy phép OFL, nằm trong `src/lib/export/fonts/`), vì font mặc định của PDF không có dấu tiếng Việt. `next.config.ts` khai báo `outputFileTracingIncludes` để font được đóng gói vào route khi deploy. DOCX dùng Arial để người dùng mở bằng Word là sửa tiếp được.
 
+### Phân tích role và luyện phỏng vấn
+
+Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng CV và JD của lần phân tích đó.
+
+**Phân tích role:** `POST /api/analyses/[id]/role`, step `role_analysis` (hạng `strong`).
+- Kết quả gồm: role thực chất làm gì, yêu cầu bắt buộc/ưu tiên kèm căn cứ trong JD, cấp độ, những điểm JD chưa nói rõ, các vòng phỏng vấn thường gặp, 10–14 câu hỏi luyện tập kèm gợi ý theo CV, và câu hỏi nên hỏi lại nhà tuyển dụng.
+- Prompt cấm bịa thông tin về công ty; các vòng phỏng vấn được ghi rõ là "thường gặp".
+- Mỗi bản phân tích CV có một báo cáo role, lưu ở bảng `role_reports`. Một dòng trạng thái `running` giữ chỗ để hai request song song không tạo hai lần.
+
+**Luyện phỏng vấn:** bảng `interview_sessions` và `interview_turns`.
+- `POST /api/interviews` tạo buổi phỏng vấn (giữ chỗ quota trong transaction có khoá theo user) và lấy câu hỏi đầu tiên. Nếu không tạo được câu hỏi thì xoá buổi đó để không trừ lượt.
+- `POST /api/interviews/[id]/answer` lưu câu trả lời, kèm nhận xét nếu bật, và lượt tiếp theo của người phỏng vấn. Lượt hỏi dùng step `interview_turn` (hạng `fast`, ưu tiên độ trễ thấp); JD và CV nằm trong system prompt để được prompt cache giữa các lượt.
+- `POST /api/interviews/[id]/finish` chấm cả buổi bằng step `interview_report` (hạng `strong`): rubric cấu trúc / trọng tâm / dẫn chứng / diễn đạt, điểm từng câu, ưu tiên cải thiện, và câu trả lời yếu nhất được viết lại chỉ từ dữ kiện có thật.
+- Khi người phỏng vấn tự kết thúc (`closing`), client tự gọi chấm điểm.
+- Mỗi buổi tối đa 40 lượt; câu trả lời tối đa 4000 ký tự.
+- Danh sách các buổi ở `/[lang]/interviews`.
+
 ## Cấu trúc thư mục
 
 ```
@@ -130,6 +149,7 @@ src/
   lib/analysis/           pipeline và kiểu dữ liệu báo cáo
   lib/parsing/            đọc file CV
   lib/export/             ghép gợi ý vào CV, xuất PDF/DOCX, font nhúng
+  lib/role/, lib/interview/   phân tích role, phiên luyện phỏng vấn và quota
   db/                     schema Drizzle và migrations
 ```
 

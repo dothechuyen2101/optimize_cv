@@ -1,6 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { hasLocale, type Locale } from "@/i18n/config";
-import { AIConfigError, getProvider, providerApiKey } from "@/lib/ai/providers";
+import { aiErrorCode } from "@/lib/ai/errors";
 import { AIStepError, type UsageRecord } from "@/lib/ai/run-step";
 import { analysisCacheKey, jdContentHash } from "@/lib/analysis/keys";
 import type { Job } from "@/lib/ai/schemas/job";
@@ -33,29 +32,6 @@ function isMarket(value: string): value is AnalysisInputs["market"] {
 
 function fail(code: AnalysisErrorCode, status = 400) {
   return Response.json({ type: "error", code } satisfies AnalysisEvent, { status });
-}
-
-function errorCode(error: unknown): AnalysisErrorCode {
-  if (error instanceof AIStepError) {
-    return ({ refusal: "ai_refusal", truncated: "ai_truncated", invalid_output: "ai_invalid_output" } as const)[
-      error.reason
-    ];
-  }
-  if (
-    error instanceof AIConfigError ||
-    error instanceof Anthropic.AuthenticationError ||
-    error instanceof Anthropic.PermissionDeniedError
-  ) {
-    return "ai_auth";
-  }
-  if (error instanceof Anthropic.RateLimitError || error instanceof Anthropic.InternalServerError) {
-    return "ai_rate_limited";
-  }
-  // With no credentials at all the SDK throws a plain Error before sending anything.
-  if (!(error instanceof Anthropic.APIError) && !providerApiKey(getProvider()) && !process.env.ANTHROPIC_AUTH_TOKEN) {
-    return "ai_auth";
-  }
-  return "server";
 }
 
 function ndjson(run: (send: (event: AnalysisEvent) => void) => Promise<void>): Response {
@@ -192,7 +168,7 @@ export async function POST(request: Request) {
       send({ type: "result", analysisId });
     } catch (error) {
       console.error("[analyze] failed", error);
-      const code = errorCode(error);
+      const code = aiErrorCode(error);
       // A failed call that still returned a response was billed.
       if (error instanceof AIStepError) await onUsage(error.usage).catch(() => {});
       await failAnalysis(analysisId, code).catch(() => {});

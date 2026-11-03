@@ -9,7 +9,7 @@ import { getSessionUser } from "@/lib/auth/session";
 async function AnalysisDetail({ params }: { params: PageProps<"/[lang]/analyses/[id]">["params"] }) {
   const { id } = await params;
   const locale = await getLocale();
-  const { analyze, history } = await getDictionary();
+  const { analyze, history, nextSteps } = await getDictionary();
 
   const user = await getSessionUser();
   if (!user) redirect(`/${locale}/login?next=/${locale}/analyses/${id}`);
@@ -22,7 +22,18 @@ async function AnalysisDetail({ params }: { params: PageProps<"/[lang]/analyses/
       <Link href={`/${locale}/history`} className="text-sm text-subtle hover:text-foreground">
         ← {history.back}
       </Link>
-      <div className="mt-4">
+      <nav aria-label={nextSteps.title} className="mt-4 grid gap-3 sm:grid-cols-2">
+        {[
+          { href: `/${locale}/analyses/${id}/role`, title: nextSteps.role, body: nextSteps.roleBody },
+          { href: `/${locale}/analyses/${id}/interview`, title: nextSteps.interview, body: nextSteps.interviewBody },
+        ].map((step) => (
+          <Link key={step.href} href={step.href} className="rounded-xl border border-line bg-card p-4 hover:border-primary">
+            <p className="font-semibold text-primary">{step.title} →</p>
+            <p className="mt-1 text-sm text-subtle">{step.body}</p>
+          </Link>
+        ))}
+      </nav>
+      <div className="mt-6">
         <SavedAnalysis report={found.report} choices={found.choices} locale={locale} dict={analyze} />
       </div>
     </>

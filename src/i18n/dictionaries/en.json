@@ -9,7 +9,8 @@
     "history": "History",
     "login": "Sign in",
     "logout": "Sign out",
-    "switchTo": "Tiếng Việt"
+    "switchTo": "Tiếng Việt",
+    "interviews": "Interviews"
   },
   "auth": {
     "login": {
@@ -275,5 +276,116 @@
     "rescoreFailed": "Couldn't rescore. Please try again.",
     "reuploadHint": "Downloaded the resume and edited it in Word or elsewhere?",
     "reupload": "Upload the revised CV for this JD"
+  },
+  "nextSteps": {
+    "title": "Next steps",
+    "role": "Role analysis",
+    "roleBody": "Decode the JD: what the job really is, the usual interview rounds and questions to practice.",
+    "interview": "Practice interview",
+    "interviewBody": "A mock interview by chat with AI, based on this CV and JD, with feedback and a score."
+  },
+  "role": {
+    "title": "Role analysis",
+    "subtitle": "Decode the JD: what the job really is, which requirements are essential, the usual interview rounds and questions to practice.",
+    "back": "Back to the analysis",
+    "generate": "Generate role analysis",
+    "generating": "Analyzing the role, usually 30–60 seconds…",
+    "generateNote": "Free, generated once per CV analysis, from your JD and resume.",
+    "running": "The role analysis is being generated. Reload the page in a few minutes.",
+    "failed": "The last attempt failed. You can try again.",
+    "summary": "What this role really is",
+    "responsibilities": "The actual work",
+    "mustHave": "Must-haves",
+    "niceToHave": "Nice-to-haves",
+    "evidence": "In the JD",
+    "seniority": "Level",
+    "unknowns": "What the JD leaves unclear",
+    "rounds": "Usual interview rounds",
+    "roundsNote": "This is the usual process for similar roles, not information about the company.",
+    "practice": "Practice questions",
+    "whyAsked": "What they want to know",
+    "answerTips": "How to answer",
+    "category": {
+      "behavioral": "Behavioral",
+      "technical": "Technical",
+      "role": "Role",
+      "hr": "HR"
+    },
+    "yourAngle": "Your angle",
+    "strengths": "Strengths to lead with",
+    "gapsToPrepare": "Gaps to prepare an answer for",
+    "questionsToAsk": "Questions to ask the interviewers",
+    "practiceCta": "Practice an interview for this JD",
+    "disclaimer": "Based on the JD and resume you provided; the AI has no inside information about the company."
+  },
+  "interview": {
+    "listTitle": "Practice interviews",
+    "listSubtitle": "Your mock interviews, newest first.",
+    "listEmpty": "No practice interviews yet. Open a CV analysis and choose Practice interview.",
+    "listStart": "Open your analyses",
+    "active": "In progress",
+    "quota": "{used}/{limit} free sessions used this month.",
+    "setupTitle": "Practice interview",
+    "setupSubtitle": "An AI interviewer asks one question at a time based on this analysis's CV and JD, and follows up when an answer is vague.",
+    "back": "Back to the analysis",
+    "type": "Interview type",
+    "types": {
+      "behavioral": "Behavioral (STAR)",
+      "technical": "Technical",
+      "hr": "HR and motivation",
+      "mixed": "Mixed"
+    },
+    "difficulty": "Difficulty",
+    "difficulties": {
+      "easy": "Gentle",
+      "normal": "Realistic",
+      "hard": "Hard"
+    },
+    "language": "Interview language",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "feedback": "Feedback after each answer",
+    "feedbackHint": "Turn it off for a real-interview feel and see the feedback only at the end.",
+    "start": "Start interview",
+    "starting": "Preparing the first question…",
+    "quotaLeft": "{remaining}/{limit} free sessions left this month. About 6 main questions, with follow-ups.",
+    "unlimited": "About 6 main questions, with follow-ups.",
+    "interviewer": "Interviewer",
+    "you": "You",
+    "placeholder": "Type your answer…",
+    "inputHint": "Ctrl + Enter to send.",
+    "send": "Send",
+    "thinking": "The interviewer is thinking…",
+    "finish": "End and score",
+    "finishing": "Scoring the interview, usually 30–60 seconds…",
+    "closed": "The interview is over.",
+    "feedbackTitle": "Feedback",
+    "score": "{score}/5",
+    "good": "Good",
+    "improve": "To improve",
+    "betterAnswer": "A stronger answer",
+    "reportTitle": "Interview results",
+    "overall": "Overall",
+    "rubric": {
+      "structure": "Structure",
+      "relevance": "Relevance",
+      "evidence": "Evidence",
+      "communication": "Communication"
+    },
+    "perQuestion": "Question by question",
+    "topImprovements": "Top improvements",
+    "strongest": "Strongest moment",
+    "improvedAnswer": "Your weakest answer, rewritten",
+    "transcript": "Full transcript",
+    "again": "Practice another session",
+    "errors": {
+      "quota_exceeded": "You've used this month's free practice interviews.",
+      "interview_over": "The interview is over.",
+      "answer_empty": "Type an answer first.",
+      "answer_too_long": "The answer is too long, 4000 characters at most.",
+      "no_answers": "Answer at least one question before scoring."
+    }
   }
 }

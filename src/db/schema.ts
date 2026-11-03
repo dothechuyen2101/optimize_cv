@@ -1,5 +1,6 @@
 import {
   type AnyPgColumn,
+  boolean,
   index,
   integer,
   jsonb,
@@ -14,8 +15,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { authUsers } from "drizzle-orm/supabase";
 import type { Analysis } from "@/lib/ai/schemas/analysis";
+import type { AnswerFeedback, InterviewReport } from "@/lib/ai/schemas/interview";
 import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
+import type { RoleReport } from "@/lib/ai/schemas/role";
 import type { AtsResult } from "@/lib/ats/score";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
@@ -30,6 +33,11 @@ export const marketEnum = pgEnum("market", ["vn", "international"]);
 export const resumeSourceEnum = pgEnum("resume_source", ["upload", "edit", "suggestions"]);
 export const analysisStatusEnum = pgEnum("analysis_status", ["pending", "running", "completed", "failed"]);
 export const decisionEnum = pgEnum("suggestion_decision", ["accepted", "rejected"]);
+export const interviewTypeEnum = pgEnum("interview_type", ["behavioral", "technical", "hr", "mixed"]);
+export const interviewDifficultyEnum = pgEnum("interview_difficulty", ["easy", "normal", "hard"]);
+export const interviewStatusEnum = pgEnum("interview_status", ["active", "completed"]);
+export const interviewRoleEnum = pgEnum("interview_role", ["interviewer", "candidate"]);
+export const interviewTurnKindEnum = pgEnum("interview_turn_kind", ["question", "follow_up", "closing"]);
 
 // Deleting the Supabase Auth user cascades to everything they own.
 export const profiles = pgTable("profiles", {
@@ -193,4 +201,61 @@ export const creditLedger = pgTable(
     createdAt: createdAt(),
   },
   (table) => [index("credit_ledger_user_idx").on(table.userId, table.createdAt)],
+).enableRLS();
+
+// One role analysis per CV analysis, generated on request and kept.
+export const roleReports = pgTable("role_reports", {
+  analysisId: uuid("analysis_id")
+    .primaryKey()
+    .references(() => analyses.id, { onDelete: "cascade" }),
+  // "running" holds the slot while the model works, so a double click can't generate twice.
+  status: analysisStatusEnum("status").notNull().default("running"),
+  result: jsonb("result").$type<RoleReport>(),
+  promptVersion: text("prompt_version").notNull(),
+  errorCode: text("error_code"),
+  createdAt: createdAt(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}).enableRLS();
+
+// A practice interview by chat, set up from a CV analysis (its resume and JD give the context).
+export const interviewSessions = pgTable(
+  "interview_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => analyses.id, { onDelete: "cascade" }),
+    type: interviewTypeEnum("type").notNull(),
+    difficulty: interviewDifficultyEnum("difficulty").notNull(),
+    language: localeEnum("language").notNull(),
+    // Coaching after each answer.
+    feedback: boolean("feedback").notNull(),
+    status: interviewStatusEnum("status").notNull().default("active"),
+    report: jsonb("report").$type<InterviewReport>(),
+    promptVersions: text("prompt_versions").array().notNull(),
+    createdAt: createdAt(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [index("interview_sessions_user_idx").on(table.userId, table.createdAt)],
+).enableRLS();
+
+export const interviewTurns = pgTable(
+  "interview_turns",
+  {
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => interviewSessions.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    role: interviewRoleEnum("role").notNull(),
+    // Interviewer turns only.
+    kind: interviewTurnKindEnum("kind"),
+    content: text("content").notNull(),
+    // Candidate turns only, when the session gives feedback.
+    feedback: jsonb("feedback").$type<AnswerFeedback>(),
+    createdAt: createdAt(),
+  },
+  (table) => [primaryKey({ columns: [table.sessionId, table.position] })],
 ).enableRLS();

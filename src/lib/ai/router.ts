@@ -1,6 +1,13 @@
 import type { ModelTier } from "./providers";
 
-export type StepName = "parse_cv" | "parse_cv_scan" | "parse_jd" | "analyze_match";
+export type StepName =
+  | "parse_cv"
+  | "parse_cv_scan"
+  | "parse_jd"
+  | "analyze_match"
+  | "role_analysis"
+  | "interview_turn"
+  | "interview_report";
 
 export interface StepConfig {
   tier: ModelTier;
@@ -17,4 +24,8 @@ export const STEP_CONFIG: Record<StepName, StepConfig> = {
   parse_cv_scan: { tier: "strong", effort: "medium", maxTokens: 12000 },
   parse_jd: { tier: "fast", effort: "low", maxTokens: 6000 },
   analyze_match: { tier: "strong", effort: "medium", maxTokens: 16000 },
+  role_analysis: { tier: "strong", effort: "medium", maxTokens: 12000 },
+  // A chat turn: latency matters more than depth.
+  interview_turn: { tier: "fast", effort: "low", maxTokens: 2000 },
+  interview_report: { tier: "strong", effort: "medium", maxTokens: 8000 },
 };

@@ -22,6 +22,9 @@ export async function UserNav({ locale, nav }: { locale: Locale; nav: Dictionary
       <Link href={`/${locale}/history`} className={LINK}>
         {nav.history}
       </Link>
+      <Link href={`/${locale}/interviews`} className={LINK}>
+        {nav.interviews}
+      </Link>
       <form action={signOut}>
         <input type="hidden" name="locale" value={locale} />
         <button type="submit" title={user.email ?? undefined} className={LINK}>
