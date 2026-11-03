@@ -1,10 +1,14 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { supabaseConfig } from "./config";
 
 /** A Supabase client bound to this request's cookies. Create one per request. */
 export async function createSupabaseServerClient() {
+  // Supabase Auth checks token expiry against Date.now(); keep it out of prerendering,
+  // which otherwise logs "unstable value Date.now()" on every signed-in page.
+  await connection();
   const cookieStore = await cookies();
   const { url, publishableKey } = supabaseConfig();
 

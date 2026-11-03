@@ -6,6 +6,7 @@ import { InterviewDifficultySchema, InterviewTypeSchema } from "@/lib/ai/schemas
 import { nextInterviewTurn } from "@/lib/ai/steps/interview";
 import { recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { appendTurns, createInterviewSession, discardInterviewSession, loadInterview } from "@/lib/interview/service";
 
 export const maxDuration = 60;
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ code: "invalid_request" }, { status: 400 });
   const { analysisId, ...settings } = parsed.data;
 
+  if (await isRateLimited(user.id)) return Response.json({ code: "too_many_requests" }, { status: 429 });
   const created = await createInterviewSession(user.id, analysisId, settings);
   if (!created) return Response.json({ code: "invalid_request" }, { status: 404 });
   if ("quota" in created) return Response.json({ code: "quota_exceeded" }, { status: 429 });

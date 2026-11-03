@@ -3,6 +3,7 @@ import { AIStepError } from "@/lib/ai/run-step";
 import { nextInterviewTurn } from "@/lib/ai/steps/interview";
 import { recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { appendTurns, loadInterview } from "@/lib/interview/service";
 import { MAX_ANSWER_CHARS, MAX_TURNS, type InterviewErrorCode } from "@/lib/interview/types";
 
@@ -28,6 +29,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/interviews/
   const answer = typeof body?.answer === "string" ? body.answer.trim() : "";
   if (!answer) return fail("answer_empty", 400);
   if (answer.length > MAX_ANSWER_CHARS) return fail("answer_too_long", 400);
+
+  if (await isRateLimited(user.id)) return fail("too_many_requests", 429);
 
   const transcript = [
     ...interview.turns.map(({ role, kind, content }) => ({ role, kind, content })),

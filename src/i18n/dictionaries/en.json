@@ -10,7 +10,8 @@
     "login": "Sign in",
     "logout": "Sign out",
     "switchTo": "Tiếng Việt",
-    "interviews": "Interviews"
+    "interviews": "Interviews",
+    "account": "Account"
   },
   "auth": {
     "login": {
@@ -138,6 +139,7 @@
       "invalid_request": "Invalid request.",
       "unauthorized": "Your session expired. Please sign in again.",
       "quota_exceeded": "You've used all your free analyses for this month.",
+      "too_many_requests": "Too many requests. Please try again in a few minutes.",
       "ai_auth": "AI is not configured (missing or invalid ANTHROPIC_API_KEY).",
       "ai_rate_limited": "The service is busy. Please try again in a few minutes.",
       "ai_refusal": "The AI couldn't process this content.",
@@ -442,5 +444,37 @@
       "file_type": "Only PDF files are supported.",
       "file_too_large": "The PDF is larger than 4 MB."
     }
+  },
+  "account": {
+    "title": "Account",
+    "plan": "Plan",
+    "plans": {
+      "free": "Free",
+      "pro": "Pro"
+    },
+    "usageTitle": "This month's usage",
+    "usageNote": "Usage counts per calendar month (UTC) and resets on the 1st.",
+    "usage": {
+      "analysis": "CV analyses",
+      "interview": "Practice interviews",
+      "portfolio": "Portfolio reviews"
+    },
+    "used": "{used}/{limit}",
+    "unlimited": "Unlimited",
+    "shortcuts": "Shortcuts",
+    "dataTitle": "Your data",
+    "dataBody": "Download everything we store about you: parsed resumes, JDs, analysis results, suggestion choices, practice interviews and portfolio reviews.",
+    "export": "Download data (JSON)",
+    "signOut": "Sign out",
+    "deleteTitle": "Delete account",
+    "deleteBody": "Permanently delete your account with every resume, analysis, practice interview and portfolio review. This can't be undone. Original CV files are never stored.",
+    "deleteConfirm": "Type {email} to confirm",
+    "deleteButton": "Delete permanently",
+    "deleteMismatch": "That email doesn't match the signed-in account."
+  },
+  "goodbye": {
+    "title": "Account deleted",
+    "body": "Your account and all of your data have been deleted. Thank you for using OptimizeCV.",
+    "home": "Go to the home page"
   }
 }

@@ -22,10 +22,14 @@ export async function UserNav({ locale, nav }: { locale: Locale; nav: Dictionary
       <Link href={`/${locale}/history`} className={LINK}>
         {nav.history}
       </Link>
-      <Link href={`/${locale}/interviews`} className={LINK}>
+      {/* On phones these two live on the account page, so the header fits. */}
+      <Link href={`/${locale}/interviews`} className={`hidden sm:block ${LINK}`}>
         {nav.interviews}
       </Link>
-      <form action={signOut}>
+      <Link href={`/${locale}/account`} className={LINK}>
+        {nav.account}
+      </Link>
+      <form action={signOut} className="hidden sm:block">
         <input type="hidden" name="locale" value={locale} />
         <button type="submit" title={user.email ?? undefined} className={LINK}>
           {nav.logout}

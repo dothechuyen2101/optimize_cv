@@ -4,6 +4,7 @@ import { AIStepError } from "@/lib/ai/run-step";
 import { analyzeRole } from "@/lib/ai/steps/role-analysis";
 import { getAnalysisReport, recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { claimRoleReport, completeRoleReport, failRoleReport, getRoleReport } from "@/lib/role/service";
 
 export const maxDuration = 120;
@@ -16,6 +17,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/analyses/[i
   const found = await getAnalysisReport(user.id, id);
   if (!found) return Response.json({ code: "invalid_request" }, { status: 404 });
 
+  if (await isRateLimited(user.id)) return Response.json({ code: "too_many_requests" }, { status: 429 });
   if (!(await claimRoleReport(id))) {
     // Already generated, or another request is generating it.
     const state = await getRoleReport(user.id, id);

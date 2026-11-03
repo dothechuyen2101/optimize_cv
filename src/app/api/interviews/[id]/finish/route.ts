@@ -3,6 +3,7 @@ import { AIStepError } from "@/lib/ai/run-step";
 import { scoreInterview } from "@/lib/ai/steps/interview";
 import { recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { completeInterview, loadInterview } from "@/lib/interview/service";
 import type { InterviewErrorCode } from "@/lib/interview/types";
 
@@ -20,6 +21,7 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/interviews
   if (interview.report) return Response.json({ report: interview.report });
   // Scoring an empty transcript would spend the strong model on nothing.
   if (!interview.turns.some((turn) => turn.role === "candidate")) return fail("no_answers", 409);
+  if (await isRateLimited(user.id)) return fail("too_many_requests", 429);
 
   try {
     const transcript = interview.turns.map(({ role, kind, content }) => ({ role, kind, content }));

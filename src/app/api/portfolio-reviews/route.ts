@@ -4,6 +4,7 @@ import { AIStepError } from "@/lib/ai/run-step";
 import { reviewPortfolio } from "@/lib/ai/steps/portfolio-review";
 import { getAnalysisReport, recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { CvFileRejected, MAX_PDF_PAGES, readPdfFile } from "@/lib/parsing/cv-document";
 import { parseGithubTarget } from "@/lib/portfolio/fetch";
 import { completePortfolioReview, failPortfolioReview, reservePortfolioReview } from "@/lib/portfolio/service";
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
     if ((pdf.pages ?? 0) > MAX_PDF_PAGES) return fail("too_many_pages");
   }
 
+  if (await isRateLimited(user.id)) return fail("too_many_requests", 429);
   const found = await getAnalysisReport(user.id, analysisId);
   if (!found) return fail("invalid_request", 404);
   const reservation = await reservePortfolioReview(user.id, analysisId, {

@@ -10,7 +10,8 @@
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
     "switchTo": "English",
-    "interviews": "Phỏng vấn"
+    "interviews": "Phỏng vấn",
+    "account": "Tài khoản"
   },
   "auth": {
     "login": {
@@ -138,6 +139,7 @@
       "invalid_request": "Yêu cầu không hợp lệ.",
       "unauthorized": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",
       "quota_exceeded": "Bạn đã dùng hết lượt phân tích miễn phí của tháng này.",
+      "too_many_requests": "Bạn đang gửi quá nhiều yêu cầu. Hãy thử lại sau vài phút.",
       "ai_auth": "AI chưa được cấu hình (thiếu hoặc sai ANTHROPIC_API_KEY).",
       "ai_rate_limited": "Hệ thống đang quá tải, vui lòng thử lại sau ít phút.",
       "ai_refusal": "AI không thể xử lý nội dung này.",
@@ -442,5 +444,37 @@
       "file_type": "Chỉ hỗ trợ file PDF.",
       "file_too_large": "File PDF vượt quá 4 MB."
     }
+  },
+  "account": {
+    "title": "Tài khoản",
+    "plan": "Gói",
+    "plans": {
+      "free": "Miễn phí",
+      "pro": "Pro"
+    },
+    "usageTitle": "Lượt dùng tháng này",
+    "usageNote": "Lượt được tính theo tháng dương lịch (giờ UTC) và làm mới vào ngày 1.",
+    "usage": {
+      "analysis": "Phân tích CV",
+      "interview": "Luyện phỏng vấn",
+      "portfolio": "Review portfolio"
+    },
+    "used": "{used}/{limit}",
+    "unlimited": "Không giới hạn",
+    "shortcuts": "Đi nhanh",
+    "dataTitle": "Dữ liệu của bạn",
+    "dataBody": "Tải về toàn bộ dữ liệu chúng tôi lưu về bạn: CV đã đọc, JD, kết quả phân tích, lựa chọn gợi ý, các buổi phỏng vấn và review portfolio.",
+    "export": "Tải dữ liệu (JSON)",
+    "signOut": "Đăng xuất",
+    "deleteTitle": "Xoá tài khoản",
+    "deleteBody": "Xoá vĩnh viễn tài khoản cùng toàn bộ CV, kết quả phân tích, buổi phỏng vấn và review portfolio. Không thể khôi phục. File CV gốc vốn không được lưu.",
+    "deleteConfirm": "Nhập email {email} để xác nhận",
+    "deleteButton": "Xoá vĩnh viễn",
+    "deleteMismatch": "Email không khớp với tài khoản đang đăng nhập."
+  },
+  "goodbye": {
+    "title": "Tài khoản đã được xoá",
+    "body": "Tài khoản và toàn bộ dữ liệu của bạn đã được xoá. Cảm ơn bạn đã dùng OptimizeCV.",
+    "home": "Về trang chủ"
   }
 }

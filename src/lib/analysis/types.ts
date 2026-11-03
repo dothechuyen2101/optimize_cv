@@ -69,6 +69,7 @@ export type AnalysisErrorCode =
   | "invalid_request"
   | "unauthorized"
   | "quota_exceeded"
+  | "too_many_requests"
   | "ai_auth"
   | "ai_rate_limited"
   | "ai_refusal"

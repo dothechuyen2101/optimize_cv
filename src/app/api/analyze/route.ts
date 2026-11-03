@@ -18,6 +18,7 @@ import {
 } from "@/lib/analysis/service";
 import { JD_MAX_CHARS, JD_MIN_CHARS, type AnalysisErrorCode, type AnalysisEvent } from "@/lib/analysis/types";
 import { getSessionUser } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/billing/rate-limit";
 import { loadReanalysisInputs } from "@/lib/export/service";
 import { CvFileRejected, readCvUpload, type CvUpload } from "@/lib/parsing/cv-document";
 
@@ -141,6 +142,7 @@ export async function POST(request: Request) {
   // Identical inputs: show the earlier result, without AI cost or quota.
   const cachedId = await findCachedAnalysis(user.id, cacheKey);
   if (cachedId) return ndjson(async (send) => send({ type: "result", analysisId: cachedId }));
+  if (await isRateLimited(user.id)) return fail("too_many_requests", 429);
 
   const reservation = await reserveAnalysis(user.id, {
     cacheKey,

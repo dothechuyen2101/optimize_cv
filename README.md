@@ -21,6 +21,8 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Phân tích role: giải mã JD, yêu cầu bắt buộc/ưu tiên, vòng phỏng vấn, câu hỏi luyện tập (miễn phí, 1 lần mỗi phân tích CV) | Xong |
 | Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (free 2 buổi/tháng) | Xong |
 | Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
+| Trang Tài khoản: lượt dùng tháng này, tải toàn bộ dữ liệu (JSON), xoá tài khoản và dữ liệu (Nghị định 13, GDPR) | Xong |
+| Giới hạn tần suất gọi AI: 40 lần / 10 phút mỗi user | Xong |
 | Phỏng vấn voice realtime, thanh toán | Chưa làm (Phase 4–5, cần tài khoản LiveKit/STT/TTS và Stripe/PayOS) |
 
 ## Chạy local
@@ -150,6 +152,19 @@ Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng 
   - giới hạn 10 giây và 1.5 MB mỗi trang.
 
 Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi không đọc được nguồn nào (khi đó không gọi AI).
+
+### Tài khoản, dữ liệu cá nhân và giới hạn
+
+- `/[lang]/account` hiển thị gói và lượt dùng tháng này của từng tính năng.
+- `GET /api/account/export` tải về mọi dữ liệu đang lưu về user dưới dạng JSON: CV đã đọc, JD, kết quả phân tích, lựa chọn gợi ý, chỗ sửa tay, phân tích role, các buổi phỏng vấn và review portfolio.
+- Xoá tài khoản: người dùng phải gõ đúng email của mình, và server kiểm tra lại.
+  - Server xoá user trong `auth.users`. Mọi bảng của user nối với `profiles` bằng `ON DELETE CASCADE` nên bị xoá theo.
+  - `ai_usage` chỉ giữ dòng chi phí đã ẩn danh (`user_id` thành null); các dòng JD dùng chung vẫn được giữ.
+  - File CV gốc vốn không được lưu.
+- Rate limit ([src/lib/billing/rate-limit.ts](src/lib/billing/rate-limit.ts)): mỗi route gọi AI từ chối khi user đã có 40 lần gọi trong 10 phút, đếm từ `ai_usage`, trả mã `too_many_requests`.
+  - Mốc thời gian tính bằng `now()` của database, cùng đồng hồ với `created_at`. Đồng hồ máy chủ app có thể lệch: một máy dev từng lệch 82 giây.
+  - Khi phân tích CV, việc trả lại kết quả đã cache không bị chặn.
+- Mỗi lần tạo Supabase client phía server đều gọi `connection()` trước, vì Supabase Auth gọi `Date.now()` khi kiểm tra token. Nếu không, Next ghi lỗi "unstable value Date.now()" khi prerender mọi trang cần đăng nhập.
 
 ## Cấu trúc thư mục
 
