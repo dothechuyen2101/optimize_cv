@@ -12,7 +12,7 @@ const ACTIONS = { login: signIn, signup: signUp, forgot: requestPasswordReset, r
 
 export type AuthMode = keyof typeof ACTIONS;
 
-const INPUT = "rounded-lg border border-line bg-card px-3 py-2.5 text-sm";
+const INPUT = "rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none";
 
 export function AuthForm({ mode, locale, dict }: { mode: AuthMode; locale: Locale; dict: Dictionary["auth"] }) {
   const searchParams = useSearchParams();
@@ -72,7 +72,7 @@ export function AuthForm({ mode, locale, dict }: { mode: AuthMode; locale: Local
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg hover:opacity-90 disabled:opacity-60"
+        className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 disabled:translate-y-0 disabled:opacity-60"
       >
         {pending ? dict.pending : dict[mode].submit}
       </button>

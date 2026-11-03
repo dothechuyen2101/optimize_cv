@@ -11,7 +11,8 @@
     "logout": "Sign out",
     "switchTo": "Tiếng Việt",
     "interviews": "Interviews",
-    "account": "Account"
+    "account": "Account",
+    "getStarted": "Start free"
   },
   "auth": {
     "login": {
@@ -81,30 +82,104 @@
   },
   "home": {
     "eyebrow": "For candidates in Vietnam and worldwide",
-    "title": "Get your resume past the filters and into the interview",
+    "titleLead": "Get your resume past the filters",
+    "titleAccent": "and into the interview",
     "subtitle": "Upload your resume, paste the job description. AI scores the match the way an ATS reads it, shows the skills you're missing and rewrites each bullet without inventing experience.",
     "cta": "Optimize my resume",
+    "secondaryCta": "See how it works",
     "ctaNote": "Works with Vietnamese and English resumes, PDF or DOCX",
-    "available": "Available",
-    "comingSoon": "Coming soon",
+    "trust": [
+      "3 free analyses a month",
+      "Never invents experience",
+      "No card needed"
+    ],
+    "preview": {
+      "job": "Senior Backend Engineer",
+      "market": "International",
+      "score": "Match score",
+      "bars": [
+        {
+          "label": "Required skills",
+          "value": 86
+        },
+        {
+          "label": "Keywords",
+          "value": 72
+        },
+        {
+          "label": "Experience",
+          "value": 90
+        }
+      ],
+      "suggestion": "Suggested edit",
+      "before": "Worked on APIs for the payment system",
+      "after": "Designed Node.js REST APIs for the payment system, handling [X] transactions a day",
+      "added": "Adds",
+      "addedItems": [
+        "REST API",
+        "Node.js"
+      ],
+      "missing": "Missing",
+      "missingItems": [
+        "Kubernetes",
+        "Kafka"
+      ],
+      "gain": "+18 points after edits"
+    },
+    "featuresTitle": "Every step from resume to interview",
+    "featuresSubtitle": "One place to tailor your resume, understand the role and practice before you meet the hiring team.",
+    "newBadge": "New",
     "features": {
       "tailor": {
         "title": "Tailor resume to a JD",
-        "body": "ATS score, missing skills and bullet-by-bullet edits aligned with the job you're applying for."
+        "body": "ATS score, missing skills and line-by-line edits, then download the revised resume as PDF or Word."
       },
       "role": {
         "title": "Role analysis",
         "body": "Decode the JD: must-haves, nice-to-haves, interview rounds and the questions you're likely to get."
       },
+      "interview": {
+        "title": "Interview practice",
+        "body": "Mock interviews with AI by chat or voice, with feedback on each answer and a score at the end."
+      },
       "portfolio": {
         "title": "Portfolio review",
         "body": "Score your GitHub, website, Behance or PDF against the target role, with concrete improvements."
-      },
-      "interview": {
-        "title": "Interview practice",
-        "body": "Mock interviews by chat or by voice like a real call, scored after every session."
       }
-    }
+    },
+    "howTitle": "Three steps to an interview invite",
+    "steps": [
+      {
+        "title": "Upload your resume, paste the JD",
+        "body": "PDF, DOCX or TXT. The AI reads every character exactly, phone numbers and dates included."
+      },
+      {
+        "title": "Get your score and edits",
+        "body": "ATS score, missing skills and line-by-line edits, aligned with the job you're applying for."
+      },
+      {
+        "title": "Revise, export and practice",
+        "body": "Accept edits, download the resume as PDF or Word, rescore it, then practice the interview with AI."
+      }
+    ],
+    "principlesTitle": "Our commitments",
+    "principles": [
+      {
+        "title": "No invented experience",
+        "body": "Every suggestion builds on your resume. When a number is missing, the AI leaves a gap like [X%] and asks you."
+      },
+      {
+        "title": "Your data stays yours",
+        "body": "Original resume files aren't stored. Download or delete all of your data at any time."
+      },
+      {
+        "title": "Vietnamese and international standards",
+        "body": "Advice follows each market's hiring conventions, for Vietnamese and English resumes alike."
+      }
+    ],
+    "finalTitle": "Ready for your next interview?",
+    "finalBody": "Start with 3 free analyses every month. No card needed.",
+    "finalCta": "Start free"
   },
   "analyze": {
     "title": "Tailor your resume to a JD",
@@ -389,7 +464,20 @@
       "interview_over": "The interview is over.",
       "answer_empty": "Type an answer first.",
       "answer_too_long": "The answer is too long, 4000 characters at most.",
-      "no_answers": "Answer at least one question before scoring."
+      "no_answers": "Answer at least one question before scoring.",
+      "voice_unavailable": "Voice answers aren't enabled yet."
+    },
+    "voice": {
+      "readAloud": "Read questions aloud",
+      "replay": "Play again",
+      "speak": "Answer by voice",
+      "stop": "Stop",
+      "connecting": "Turning on the microphone…",
+      "finishing": "Finishing…",
+      "listening": "Listening… press Stop when you're done, fix the text if needed, then Send.",
+      "noVoice": "This device has no {language} voice, so questions show as text only. Edge, iPhone and Android usually have one.",
+      "privacy": "Your voice is transcribed by Deepgram; the recording isn't kept.",
+      "micDenied": "The browser hasn't allowed the microphone. Allow it for this site and try again."
     }
   },
   "portfolio": {
@@ -476,5 +564,9 @@
     "title": "Account deleted",
     "body": "Your account and all of your data have been deleted. Thank you for using OptimizeCV.",
     "home": "Go to the home page"
+  },
+  "footer": {
+    "tagline": "From resume to interview invite.",
+    "rights": "© 2026 OptimizeCV"
   }
 }

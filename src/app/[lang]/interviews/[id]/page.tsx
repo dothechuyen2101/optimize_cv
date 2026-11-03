@@ -5,6 +5,7 @@ import { InterviewChat } from "@/components/interview/interview-chat";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getSessionUser } from "@/lib/auth/session";
 import { loadInterview } from "@/lib/interview/service";
+import { speechInputConfigured } from "@/lib/speech/deepgram";
 
 async function Session({ params }: { params: PageProps<"/[lang]/interviews/[id]">["params"] }) {
   const { id } = await params;
@@ -36,6 +37,8 @@ async function Session({ params }: { params: PageProps<"/[lang]/interviews/[id]"
       </header>
       <InterviewChat
         sessionId={id}
+        language={settings.language}
+        voiceInput={speechInputConfigured()}
         initialTurns={interview.turns}
         initialReport={interview.report}
         newSessionHref={`/${locale}/analyses/${interview.analysisId}/interview`}

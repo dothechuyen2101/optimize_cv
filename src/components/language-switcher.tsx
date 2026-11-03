@@ -11,7 +11,7 @@ export function LanguageSwitcherLink({ locale, label, href }: { locale: Locale; 
     <Link
       href={href ?? `/${target}`}
       hrefLang={target}
-      className="rounded-md border border-line px-3 py-1.5 font-medium text-subtle hover:bg-soft hover:text-foreground"
+      className="ml-1 rounded-lg border border-line px-3 py-1.5 font-medium text-subtle hover:border-primary/40 hover:bg-soft hover:text-foreground"
     >
       {label}
     </Link>

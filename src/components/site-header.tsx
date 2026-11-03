@@ -2,21 +2,20 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
+import { LogoMark } from "./icons";
 import { LanguageSwitcher, LanguageSwitcherLink } from "./language-switcher";
-import { UserNav } from "./user-nav";
+import { NAV_LINK, UserNav } from "./user-nav";
 
 export function SiteHeader({ locale, nav }: { locale: Locale; nav: Dictionary["nav"] }) {
   return (
-    <header className="border-b border-line bg-card/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
-        <Link href={`/${locale}`} className="text-base font-semibold tracking-tight">
+    <header className="sticky top-0 z-40 border-b border-line/70 bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
+        <Link href={`/${locale}`} className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
+          <LogoMark />
           {nav.brand}
         </Link>
         <nav className="flex items-center gap-1 text-sm">
-          <Link
-            href={`/${locale}/analyze`}
-            className="hidden rounded-md px-3 py-1.5 font-medium text-subtle hover:bg-soft hover:text-foreground sm:block"
-          >
+          <Link href={`/${locale}/analyze`} className={`hidden sm:block ${NAV_LINK}`}>
             {nav.analyze}
           </Link>
           {/* Reads the session cookie, so it streams in after the static header. */}

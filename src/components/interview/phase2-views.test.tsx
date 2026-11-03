@@ -47,6 +47,8 @@ function chat(report: InterviewReport | null, turns = TURNS) {
   return renderToStaticMarkup(
     <InterviewChat
       sessionId="s1"
+      language="vi"
+      voiceInput
       initialTurns={turns}
       initialReport={report}
       newSessionHref="/vi/analyses/a1/interview"

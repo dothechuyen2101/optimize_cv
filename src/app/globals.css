@@ -8,6 +8,8 @@
   --line: #e3e7ef;
   --primary: #4338ca;
   --primary-fg: #ffffff;
+  /* Second stop of the brand gradient. */
+  --accent: #7c3aed;
   --soft: #eef0fd;
   --success: #047857;
   --success-soft: #e6f6ef;
@@ -26,6 +28,7 @@
     --line: #232c47;
     --primary: #8b93f8;
     --primary-fg: #0b1020;
+    --accent: #b794f6;
     --soft: #1c2250;
     --success: #34d399;
     --success-soft: #0f2a22;
@@ -44,6 +47,7 @@
   --color-line: var(--line);
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
+  --color-accent: var(--accent);
   --color-soft: var(--soft);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
@@ -54,7 +58,83 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@theme {
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+  }
+
+  /* Every interactive element eases between states instead of snapping. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      opacity 150ms ease,
+      transform 150ms ease;
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.98);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

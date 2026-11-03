@@ -17,3 +17,8 @@ export async function getLocale(): Promise<Locale> {
 export async function getDictionary(): Promise<Dictionary> {
   return dictionaries[await getLocale()]();
 }
+
+/** For code that gets the locale as a param instead of from the route, like metadata images. */
+export function dictionaryFor(locale: Locale): Promise<Dictionary> {
+  return dictionaries[locale]();
+}

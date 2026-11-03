@@ -11,7 +11,8 @@
     "logout": "Đăng xuất",
     "switchTo": "English",
     "interviews": "Phỏng vấn",
-    "account": "Tài khoản"
+    "account": "Tài khoản",
+    "getStarted": "Dùng miễn phí"
   },
   "auth": {
     "login": {
@@ -81,30 +82,104 @@
   },
   "home": {
     "eyebrow": "Dành cho ứng viên Việt Nam và quốc tế",
-    "title": "Đưa CV của bạn qua vòng lọc, tới thẳng buổi phỏng vấn",
+    "titleLead": "Đưa CV của bạn qua vòng lọc,",
+    "titleAccent": "tới thẳng buổi phỏng vấn",
     "subtitle": "Tải CV lên, dán JD. AI chấm độ khớp theo cách hệ thống ATS đọc CV, chỉ ra kỹ năng còn thiếu và viết lại từng bullet mà không bịa thêm kinh nghiệm.",
     "cta": "Tối ưu CV ngay",
+    "secondaryCta": "Xem cách hoạt động",
     "ctaNote": "Hỗ trợ CV tiếng Việt và tiếng Anh, định dạng PDF hoặc DOCX",
-    "available": "Đã có",
-    "comingSoon": "Sắp ra mắt",
+    "trust": [
+      "Miễn phí 3 lượt mỗi tháng",
+      "Không bịa thêm kinh nghiệm",
+      "Không cần thẻ"
+    ],
+    "preview": {
+      "job": "Senior Backend Engineer",
+      "market": "Chuẩn Việt Nam",
+      "score": "Điểm phù hợp",
+      "bars": [
+        {
+          "label": "Kỹ năng bắt buộc",
+          "value": 86
+        },
+        {
+          "label": "Từ khóa",
+          "value": 72
+        },
+        {
+          "label": "Kinh nghiệm",
+          "value": 90
+        }
+      ],
+      "suggestion": "Gợi ý sửa",
+      "before": "Làm API cho hệ thống thanh toán",
+      "after": "Thiết kế REST API bằng Node.js cho hệ thống thanh toán, xử lý [X] giao dịch mỗi ngày",
+      "added": "Bổ sung",
+      "addedItems": [
+        "REST API",
+        "Node.js"
+      ],
+      "missing": "Còn thiếu",
+      "missingItems": [
+        "Kubernetes",
+        "Kafka"
+      ],
+      "gain": "+18 điểm sau khi sửa"
+    },
+    "featuresTitle": "Mọi bước từ CV đến buổi phỏng vấn",
+    "featuresSubtitle": "Một nơi để tối ưu CV, hiểu rõ vị trí và luyện tập trước khi gặp nhà tuyển dụng.",
+    "newBadge": "Mới",
     "features": {
       "tailor": {
         "title": "Tối ưu CV theo JD",
-        "body": "Điểm ATS, kỹ năng còn thiếu và gợi ý sửa từng bullet, bám sát JD bạn ứng tuyển."
+        "body": "Điểm ATS, kỹ năng còn thiếu và gợi ý sửa từng dòng, rồi xuất CV đã sửa ra PDF hoặc Word."
       },
       "role": {
         "title": "Phân tích role",
         "body": "Giải mã JD: yêu cầu bắt buộc, điểm cộng, các vòng phỏng vấn và câu hỏi có thể gặp."
       },
+      "interview": {
+        "title": "Luyện phỏng vấn",
+        "body": "Phỏng vấn thử với AI bằng chat hoặc giọng nói, có nhận xét từng câu và chấm điểm cuối buổi."
+      },
       "portfolio": {
         "title": "Review portfolio",
         "body": "Chấm GitHub, website, Behance hoặc PDF theo role mục tiêu, kèm việc cần cải thiện."
-      },
-      "interview": {
-        "title": "Luyện phỏng vấn",
-        "body": "Phỏng vấn thử bằng chat hoặc giọng nói như gọi điện, có chấm điểm sau mỗi buổi."
       }
-    }
+    },
+    "howTitle": "Ba bước để được gọi phỏng vấn",
+    "steps": [
+      {
+        "title": "Tải CV và dán JD",
+        "body": "PDF, DOCX hoặc TXT. AI đọc đúng từng chữ trong CV, kể cả số điện thoại và ngày tháng."
+      },
+      {
+        "title": "Nhận điểm và gợi ý",
+        "body": "Điểm ATS, kỹ năng còn thiếu và gợi ý sửa từng dòng, bám sát JD bạn ứng tuyển."
+      },
+      {
+        "title": "Sửa, xuất CV và luyện tập",
+        "body": "Chấp nhận gợi ý, tải CV ra PDF hoặc Word, chấm lại điểm rồi luyện phỏng vấn với AI."
+      }
+    ],
+    "principlesTitle": "Cam kết của chúng tôi",
+    "principles": [
+      {
+        "title": "Không bịa kinh nghiệm",
+        "body": "Mọi gợi ý đều dựa trên CV của bạn. Thiếu số liệu thì AI để chỗ trống như [X%] và hỏi lại bạn."
+      },
+      {
+        "title": "Dữ liệu là của bạn",
+        "body": "Không lưu file CV gốc. Bạn tải về hoặc xoá toàn bộ dữ liệu bất cứ lúc nào."
+      },
+      {
+        "title": "Chuẩn Việt Nam và quốc tế",
+        "body": "Gợi ý theo thói quen tuyển dụng của từng thị trường, cho cả CV tiếng Việt lẫn tiếng Anh."
+      }
+    ],
+    "finalTitle": "Sẵn sàng cho buổi phỏng vấn tiếp theo?",
+    "finalBody": "Bắt đầu với 3 lượt phân tích miễn phí mỗi tháng. Không cần thẻ.",
+    "finalCta": "Bắt đầu miễn phí"
   },
   "analyze": {
     "title": "Tối ưu CV theo JD",
@@ -389,7 +464,20 @@
       "interview_over": "Buổi phỏng vấn đã kết thúc.",
       "answer_empty": "Hãy nhập câu trả lời.",
       "answer_too_long": "Câu trả lời quá dài, tối đa 4000 ký tự.",
-      "no_answers": "Hãy trả lời ít nhất một câu trước khi chấm điểm."
+      "no_answers": "Hãy trả lời ít nhất một câu trước khi chấm điểm.",
+      "voice_unavailable": "Chế độ trả lời bằng giọng nói chưa được bật."
+    },
+    "voice": {
+      "readAloud": "Đọc câu hỏi bằng giọng nói",
+      "replay": "Nghe lại",
+      "speak": "Trả lời bằng giọng nói",
+      "stop": "Dừng",
+      "connecting": "Đang bật micro…",
+      "finishing": "Đang hoàn tất…",
+      "listening": "Đang nghe… nói xong thì bấm Dừng, sửa lại chữ nếu cần rồi Gửi.",
+      "noVoice": "Thiết bị này chưa có giọng đọc {language}, câu hỏi chỉ hiện bằng chữ. Edge, iPhone và Android thường có sẵn.",
+      "privacy": "Giọng nói được chuyển thành chữ qua Deepgram; bản ghi âm không được lưu.",
+      "micDenied": "Trình duyệt chưa được cấp quyền dùng micro. Hãy cho phép micro cho trang này rồi thử lại."
     }
   },
   "portfolio": {
@@ -476,5 +564,9 @@
     "title": "Tài khoản đã được xoá",
     "body": "Tài khoản và toàn bộ dữ liệu của bạn đã được xoá. Cảm ơn bạn đã dùng OptimizeCV.",
     "home": "Về trang chủ"
+  },
+  "footer": {
+    "tagline": "Từ CV đến lời mời phỏng vấn.",
+    "rights": "© 2026 OptimizeCV"
   }
 }

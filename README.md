@@ -23,7 +23,11 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
 | Trang Tài khoản: lượt dùng tháng này, tải toàn bộ dữ liệu (JSON), xoá tài khoản và dữ liệu (Nghị định 13, GDPR) | Xong |
 | Giới hạn tần suất gọi AI: 40 lần / 10 phút mỗi user | Xong |
-| Phỏng vấn voice realtime, thanh toán | Chưa làm (Phase 4–5, cần tài khoản LiveKit/STT/TTS và Stripe/PayOS) |
+| SEO song ngữ: metadata, hreflang, robots.txt, sitemap.xml, ảnh chia sẻ (Open Graph) theo ngôn ngữ | Xong |
+| Giao diện mới: trang chủ giới thiệu đủ 4 tính năng, header dính, footer, trang đăng nhập/đăng ký mới, hiệu ứng chuyển động (tắt khi máy bật giảm chuyển động), sáng/tối | Xong |
+| Phỏng vấn bằng giọng nói (bản đầu): trả lời bằng micro (Deepgram), câu hỏi được đọc bằng giọng của trình duyệt | Xong |
+| Phỏng vấn "như gọi điện" (song công, chen ngang, độ trễ thấp qua LiveKit), giọng đọc Azure/FPT.AI | Chưa làm |
+| Thanh toán (payOS cho Việt Nam, Paddle cho quốc tế; Stripe không hỗ trợ doanh nghiệp Việt Nam) | Chưa làm |
 
 ## Chạy local
 
@@ -138,6 +142,17 @@ Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng 
 - Mỗi buổi tối đa 40 lượt; câu trả lời tối đa 4000 ký tự.
 - Danh sách các buổi ở `/[lang]/interviews`.
 
+**Trả lời bằng giọng nói** (khi có `DEEPGRAM_API_KEY`):
+- Trình duyệt stream âm thanh từ micro thẳng tới Deepgram (Nova-3, tiếng Việt hoặc tiếng Anh theo ngôn ngữ buổi phỏng vấn), vì function trên Vercel không giữ được kết nối WebSocket lâu.
+- `POST /api/interviews/[id]/speech-token` chỉ cấp **token tạm thời sống 30 giây** (Deepgram `/v1/auth/grant`) cho buổi phỏng vấn đang diễn ra của chính người dùng; key thật không rời server. Mỗi lần cấp được ghi một dòng `ai_usage` nên chịu chung rate limit.
+- URL nghe luôn có `mip_opt_out=true`: Deepgram chỉ giữ âm thanh trong lúc xử lý, không dùng để huấn luyện. App không lưu ghi âm; chỉ phần chữ người dùng bấm Gửi mới được lưu như câu trả lời gõ tay.
+- Chữ hiện dần trong ô trả lời khi đang nói. Bấm Dừng thì người dùng sửa lại rồi Gửi, vì nhận dạng thuật ngữ kỹ thuật có thể sai.
+
+**Đọc câu hỏi:** dùng giọng có sẵn của trình duyệt (`speechSynthesis`), miễn phí và đọc ngay.
+- Ưu tiên giọng "Natural/Online", ví dụ HoaiMy trên Edge. Câu hỏi được chia thành từng câu vì Chrome hay cắt ngang các lượt đọc dài.
+- Thiết bị không có giọng cho ngôn ngữ đó thì chỉ hiện chữ.
+- Có thể thay bằng Azure hoặc FPT.AI sau, khi có tài khoản.
+
 ### Review portfolio
 
 `POST /api/portfolio-reviews` nhận dữ liệu multipart gồm GitHub (username hoặc link), tối đa 3 link và file PDF tùy chọn (tối đa 4 MB, 100 trang). Route đọc các nguồn rồi đánh giá theo JD và CV của bản phân tích bằng step `portfolio_review` (hạng `strong`). Kết quả lưu ở bảng `portfolio_reviews`.
@@ -165,6 +180,13 @@ Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi khôn
   - Mốc thời gian tính bằng `now()` của database, cùng đồng hồ với `created_at`. Đồng hồ máy chủ app có thể lệch: một máy dev từng lệch 82 giây.
   - Khi phân tích CV, việc trả lại kết quả đã cache không bị chặn.
 - Mỗi lần tạo Supabase client phía server đều gọi `connection()` trước, vì Supabase Auth gọi `Date.now()` khi kiểm tra token. Nếu không, Next ghi lỗi "unstable value Date.now()" khi prerender mọi trang cần đăng nhập.
+
+### SEO
+
+- Origin công khai lấy từ `SITE_URL`; nếu không có thì dùng `VERCEL_PROJECT_PRODUCTION_URL`, biến Vercel tự đặt ([src/lib/site.ts](src/lib/site.ts)).
+- Trang chủ `/vi` và `/en` có canonical, `hreflang` (`x-default` là `/vi`) và có mặt trong `sitemap.xml`.
+- `robots.txt` chặn `/api/` và mọi trang cần đăng nhập.
+- Ảnh chia sẻ ([src/app/[lang]/opengraph-image.tsx](src/app/[lang]/opengraph-image.tsx)) được tạo lúc build cho từng ngôn ngữ, dùng font Be Vietnam Pro để hiển thị dấu tiếng Việt.
 
 ## Cấu trúc thư mục
 

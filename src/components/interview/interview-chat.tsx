@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { format } from "@/i18n/config";
+import { format, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import type { AnswerFeedback, InterviewReport } from "@/lib/ai/schemas/interview";
 import type { StoredTurn } from "@/lib/interview/service";
 import { MAX_ANSWER_CHARS, type InterviewErrorCode } from "@/lib/interview/types";
 import { interviewErrorText } from "./error-text";
 import { InterviewReportView } from "./interview-report-view";
+import { withSpokenText } from "./speech-text";
+import { useSpeechInput, useSpeechOutput } from "./use-voice";
 
 type InterviewDict = Dictionary["interview"];
 
@@ -43,7 +45,7 @@ function Feedback({ feedback, dict }: { feedback: AnswerFeedback; dict: Intervie
   );
 }
 
-function Turn({ turn, dict }: { turn: StoredTurn; dict: InterviewDict }) {
+function Turn({ turn, dict, onReplay }: { turn: StoredTurn; dict: InterviewDict; onReplay?: () => void }) {
   const candidate = turn.role === "candidate";
   return (
     <li className={`flex flex-col ${candidate ? "items-end" : "items-start"}`}>
@@ -55,6 +57,11 @@ function Turn({ turn, dict }: { turn: StoredTurn; dict: InterviewDict }) {
       >
         {turn.content}
       </div>
+      {onReplay && (
+        <button type="button" onClick={onReplay} className="mt-1 text-xs text-subtle hover:text-foreground">
+          🔊 {dict.voice.replay}
+        </button>
+      )}
       {candidate && turn.feedback && (
         <div className="w-full max-w-[85%]">
           <Feedback feedback={turn.feedback} dict={dict} />
@@ -66,6 +73,10 @@ function Turn({ turn, dict }: { turn: StoredTurn; dict: InterviewDict }) {
 
 interface Props {
   sessionId: string;
+  /** The interview's language, for reading questions aloud and transcribing answers. */
+  language: Locale;
+  /** Whether spoken answers are available (the speech-to-text key is configured). */
+  voiceInput: boolean;
   initialTurns: StoredTurn[];
   initialReport: InterviewReport | null;
   newSessionHref: string;
@@ -74,17 +85,46 @@ interface Props {
 }
 
 /** The practice interview: answer in chat, then get the session scored. */
-export function InterviewChat({ sessionId, initialTurns, initialReport, newSessionHref, dict, errors }: Props) {
+export function InterviewChat({
+  sessionId,
+  language,
+  voiceInput,
+  initialTurns,
+  initialReport,
+  newSessionHref,
+  dict,
+  errors,
+}: Props) {
   const [turns, setTurns] = useState(initialTurns);
   const [report, setReport] = useState(initialReport);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<"answer" | "finish" | null>(null);
   const [error, setError] = useState<InterviewErrorCode | null>(null);
+  const [readAloud, setReadAloud] = useState(true);
   const endRef = useRef<HTMLDivElement>(null);
+  // What was typed before speaking; the transcript is appended to it.
+  const typedBeforeSpeaking = useRef("");
+  const voice = useSpeechOutput(language);
+  const mic = useSpeechInput(sessionId, (spoken) => setDraft(withSpokenText(typedBeforeSpeaking.current, spoken)));
+  const listening = mic.state !== "idle";
 
   const last = turns.at(-1);
   const closed = report !== null || last?.kind === "closing";
   const answered = turns.some((turn) => turn.role === "candidate");
+
+  // Read the opening question once a voice is ready (voices load asynchronously).
+  const openingRead = useRef(false);
+  useEffect(() => {
+    if (openingRead.current || !voice.available || !readAloud || closed || turns.length !== 1) return;
+    openingRead.current = true;
+    voice.speak(turns[0].content);
+  }, [voice, readAloud, closed, turns]);
+
+  function startSpeaking() {
+    voice.stop();
+    typedBeforeSpeaking.current = draft;
+    mic.start();
+  }
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -125,6 +165,8 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
     if (!data) return;
     setTurns((current) => [...current, ...data.turns]);
     setDraft("");
+    const reply = data.turns.at(-1);
+    if (readAloud && reply?.role === "interviewer") voice.speak(reply.content);
     // The interviewer wrapped up: score the session right away.
     if (data.turns.at(-1)?.kind === "closing") await finish();
   }
@@ -141,7 +183,12 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
         {report && <h2 className="text-lg font-semibold">{dict.transcript}</h2>}
         <ol className="grid gap-4">
           {turns.map((turn) => (
-            <Turn key={turn.position} turn={turn} dict={dict} />
+            <Turn
+              key={turn.position}
+              turn={turn}
+              dict={dict}
+              onReplay={turn.role === "interviewer" && voice.available ? () => voice.speak(turn.content) : undefined}
+            />
           ))}
         </ol>
         {pending && (
@@ -152,6 +199,11 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
         {error && (
           <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
             {interviewErrorText(error, dict, errors)}
+          </p>
+        )}
+        {mic.error && (
+          <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
+            {mic.error === "mic_denied" ? dict.voice.micDenied : interviewErrorText(mic.error, dict, errors)}
           </p>
         )}
         <div ref={endRef} />
@@ -179,11 +231,30 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
         </div>
       ) : (
         <form onSubmit={send} className="grid gap-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtle">
+            {voice.available ? (
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={readAloud}
+                  onChange={(event) => {
+                    setReadAloud(event.target.checked);
+                    if (!event.target.checked) voice.stop();
+                  }}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {dict.voice.readAloud}
+              </label>
+            ) : (
+              <span>{format(dict.voice.noVoice, { language: dict.languages[language] })}</span>
+            )}
+            {voiceInput && mic.supported && <span>{dict.voice.privacy}</span>}
+          </div>
           <textarea
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={onKeyDown}
-            disabled={pending !== null}
+            disabled={pending !== null || listening}
             maxLength={MAX_ANSWER_CHARS}
             rows={5}
             placeholder={dict.placeholder}
@@ -193,11 +264,30 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              disabled={pending !== null || !draft.trim()}
+              disabled={pending !== null || listening || !draft.trim()}
               className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-fg hover:opacity-90 disabled:opacity-50"
             >
               {dict.send}
             </button>
+            {voiceInput && mic.supported && (
+              <button
+                type="button"
+                onClick={mic.state === "listening" ? mic.stop : startSpeaking}
+                disabled={pending !== null || mic.state === "connecting" || mic.state === "stopping"}
+                aria-pressed={mic.state === "listening"}
+                className={`rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 ${
+                  mic.state === "listening" ? "bg-danger text-white hover:opacity-90" : "border border-line bg-card hover:bg-soft"
+                }`}
+              >
+                {mic.state === "listening"
+                  ? `■ ${dict.voice.stop}`
+                  : mic.state === "connecting"
+                    ? dict.voice.connecting
+                    : mic.state === "stopping"
+                      ? dict.voice.finishing
+                      : `🎙 ${dict.voice.speak}`}
+              </button>
+            )}
             {answered && (
               <button
                 type="button"
@@ -208,7 +298,9 @@ export function InterviewChat({ sessionId, initialTurns, initialReport, newSessi
                 {dict.finish}
               </button>
             )}
-            <span className="text-xs text-subtle">{dict.inputHint}</span>
+            <span className="text-xs text-subtle" aria-live="polite">
+              {mic.state === "listening" ? dict.voice.listening : dict.inputHint}
+            </span>
           </div>
         </form>
       )}
