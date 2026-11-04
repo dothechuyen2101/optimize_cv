@@ -9,6 +9,7 @@ import {
   interviewTurns,
   jobDescriptions,
   portfolioReviews,
+  projectImports,
   profiles,
   resumeVersions,
   roleReports,
@@ -61,11 +62,12 @@ export async function exportAccountData(userId: string, email: string | null) {
 
   const analysisIds = analysisRows.map((row) => row.id);
   const sessionIds = sessions.map((session) => session.id);
-  const [decisions, summaries, edits, roles, turns] = await Promise.all([
+  const [decisions, summaries, edits, roles, githubProjects, turns] = await Promise.all([
     analysisIds.length ? db.select().from(suggestionDecisions).where(inArray(suggestionDecisions.analysisId, analysisIds)) : [],
     analysisIds.length ? db.select().from(summaryDecisions).where(inArray(summaryDecisions.analysisId, analysisIds)) : [],
     analysisIds.length ? db.select().from(cvEdits).where(inArray(cvEdits.analysisId, analysisIds)) : [],
     analysisIds.length ? db.select().from(roleReports).where(inArray(roleReports.analysisId, analysisIds)) : [],
+    analysisIds.length ? db.select().from(projectImports).where(inArray(projectImports.analysisId, analysisIds)) : [],
     sessionIds.length
       ? db.select().from(interviewTurns).where(inArray(interviewTurns.sessionId, sessionIds)).orderBy(asc(interviewTurns.position))
       : [],
@@ -81,6 +83,7 @@ export async function exportAccountData(userId: string, email: string | null) {
       summary_decision: of(summaries, row.id)[0] ?? null,
       cv_edits: of(edits, row.id),
       role_report: of(roles, row.id)[0] ?? null,
+      github_projects: of(githubProjects, row.id)[0] ?? null,
     })),
     interviews: sessions.map((session) => ({ ...session, turns: turns.filter((turn) => turn.sessionId === session.id) })),
     portfolio_reviews: reviews,

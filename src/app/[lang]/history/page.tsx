@@ -74,7 +74,7 @@ function Item({ item, locale, dict }: { item: AnalysisListItem; locale: Locale; 
 
   const row = "flex items-center justify-between gap-4 rounded-xl border border-line bg-card px-5 py-4";
   return (
-    <li>
+    <li className="min-w-0">
       {done ? (
         <Link href={`/${locale}/analyses/${item.id}`} className={`${row} hover:border-primary`}>
           {body}

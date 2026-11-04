@@ -4,6 +4,7 @@ import http from "node:http";
 import https from "node:https";
 import { isIP, type LookupFunction } from "node:net";
 import zlib from "node:zlib";
+import type { GithubTarget } from "./github-target";
 
 // Portfolio links are typed by users and fetched by our server, so every request is
 // checked against server-side request forgery: only http(s) on default ports, and
@@ -221,18 +222,6 @@ export function htmlToText(html: string): PageText {
   };
 }
 
-const GITHUB_NAME = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
-const GITHUB_REPO = /^[A-Za-z0-9._-]{1,100}$/;
-
-/** A GitHub user or repository from a username, "@username" or github.com URL. */
-export function parseGithubTarget(input: string): { owner: string; repo: string | null } | null {
-  const value = input.trim().replace(/^@/, "");
-  const fromUrl = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)(?:\/([^/?#]+))?/i.exec(value);
-  const [owner, repo] = fromUrl ? [fromUrl[1], fromUrl[2]?.replace(/\.git$/, "") ?? null] : [value, null];
-  if (!GITHUB_NAME.test(owner) || (repo !== null && !GITHUB_REPO.test(repo))) return null;
-  return { owner, repo };
-}
-
 export interface GithubRepo {
   name: string;
   description: string | null;
@@ -280,33 +269,45 @@ interface ApiRepo {
   fork: boolean;
 }
 
-/** The profile and the most notable repositories with their READMEs, or one repository when the link names it. */
-export async function fetchGithub({ owner, repo }: { owner: string; repo: string | null }): Promise<GithubSummary> {
-  const [profile, repos] = await Promise.all([
-    github<GithubSummary["profile"]>(`/users/${owner}`),
-    repo
-      ? github<ApiRepo>(`/repos/${owner}/${repo}`).then((one) => [one])
-      : github<ApiRepo[]>(`/users/${owner}/repos?sort=pushed&per_page=50`),
-  ]);
-  const picked = repos
-    .filter((item) => repo || !item.fork)
-    .sort((a, b) => b.stargazers_count - a.stargazers_count || b.pushed_at.localeCompare(a.pushed_at))
-    .slice(0, MAX_REPOS);
-  const withReadmes = await Promise.all(
-    picked.map(async (item) => ({
-      name: item.name,
-      description: item.description,
-      language: item.language,
-      stars: item.stargazers_count,
-      forks: item.forks_count,
-      topics: item.topics ?? [],
-      pushed_at: item.pushed_at,
-      homepage: item.homepage,
+/** A repository as listed, before its README is read. */
+export type GithubRepoInfo = Omit<GithubRepo, "readme">;
+
+/** The account's own repositories (forks left out), most recently pushed first, or the one repository the link names. */
+export async function listGithubRepos({ owner, repo }: GithubTarget, limit = 100): Promise<GithubRepoInfo[]> {
+  const repos = repo
+    ? [await github<ApiRepo>(`/repos/${owner}/${repo}`)]
+    : (await github<ApiRepo[]>(`/users/${owner}/repos?sort=pushed&per_page=${limit}`)).filter((item) => !item.fork);
+  return repos.map((item) => ({
+    name: item.name,
+    description: item.description,
+    language: item.language,
+    stars: item.stargazers_count,
+    forks: item.forks_count,
+    topics: item.topics ?? [],
+    pushed_at: item.pushed_at,
+    homepage: item.homepage,
+  }));
+}
+
+/** The repositories with the start of their READMEs; null where there is none. */
+export function withReadmes(owner: string, repos: GithubRepoInfo[], chars = README_CHARS): Promise<GithubRepo[]> {
+  return Promise.all(
+    repos.map(async (item) => ({
+      ...item,
       readme: await github<string>(`/repos/${owner}/${item.name}/readme`, "application/vnd.github.raw")
-        .then((text) => text.slice(0, README_CHARS))
+        .then((text) => text.slice(0, chars))
         .catch(() => null),
     })),
   );
+}
+
+/** The profile and the most notable repositories with their READMEs, or one repository when the link names it. */
+export async function fetchGithub(target: GithubTarget): Promise<GithubSummary> {
+  const [profile, repos] = await Promise.all([
+    github<GithubSummary["profile"]>(`/users/${target.owner}`),
+    listGithubRepos(target, 50),
+  ]);
+  const picked = repos.sort((a, b) => b.stars - a.stars || b.pushed_at.localeCompare(a.pushed_at)).slice(0, MAX_REPOS);
   const { login, name, bio, public_repos, followers, blog, created_at } = profile;
-  return { profile: { login, name, bio, public_repos, followers, blog, created_at }, repos: withReadmes };
+  return { profile: { login, name, bio, public_repos, followers, blog, created_at }, repos: await withReadmes(target.owner, picked) };
 }

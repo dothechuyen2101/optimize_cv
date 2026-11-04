@@ -195,6 +195,10 @@
     "marketAuto": "Tự nhận diện theo JD",
     "marketVn": "Việt Nam",
     "marketIntl": "Quốc tế",
+    "github": "Link GitHub (không bắt buộc)",
+    "githubPlaceholder": "username hoặc https://github.com/username",
+    "githubHint": "CV chưa có các dự án gần đây? AI chọn repo công khai hợp với JD và viết thành mục dự án để bạn duyệt. Miễn phí.",
+    "githubInvalid": "Link GitHub không hợp lệ. Nhập username hoặc link dạng https://github.com/username.",
     "submit": "Phân tích",
     "submitting": "Đang phân tích…",
     "quotaLeft": "Còn {remaining}/{limit} lượt phân tích miễn phí trong tháng này.",
@@ -202,7 +206,8 @@
     "progress": {
       "parsing": "Đang đọc CV và JD…",
       "scoring": "Đang chấm điểm ATS…",
-      "analyzing": "AI đang phân tích và viết gợi ý…"
+      "analyzing": "AI đang phân tích và viết gợi ý…",
+      "github": "Đang đọc GitHub và viết dự án…"
     },
     "errors": {
       "missing_file": "Vui lòng chọn file CV.",
@@ -314,7 +319,7 @@
   },
   "cv": {
     "title": "CV đã chỉnh sửa",
-    "subtitle": "CV gốc của bạn với các gợi ý đã chấp nhận, trình bày theo mẫu một cột thân thiện với ATS.",
+    "subtitle": "CV gốc của bạn với các gợi ý và dự án GitHub đã chấp nhận, trình bày theo mẫu một cột thân thiện với ATS.",
     "back": "Quay lại kết quả phân tích",
     "downloadPdf": "Tải PDF",
     "downloadDocx": "Tải Word (DOCX)",
@@ -352,7 +357,8 @@
     "rescoreNote": "Điểm ATS được chấm bằng code, theo cùng JD và tiêu chí như lần đầu. Muốn có nhận định và gợi ý mới, hãy phân tích lại bằng AI.",
     "rescoreFailed": "Chưa chấm lại được điểm. Hãy thử lại.",
     "reuploadHint": "Đã tải CV về và sửa bằng Word hoặc công cụ khác?",
-    "reupload": "Upload CV đã sửa với JD này"
+    "reupload": "Upload CV đã sửa với JD này",
+    "githubAdded": "Đã thêm {count} dự án từ GitHub."
   },
   "nextSteps": {
     "title": "Bước tiếp theo",
@@ -361,7 +367,9 @@
     "interview": "Luyện phỏng vấn",
     "interviewBody": "Phỏng vấn thử bằng chat với AI theo CV và JD này, có nhận xét và chấm điểm.",
     "portfolio": "Review portfolio",
-    "portfolioBody": "Đánh giá GitHub, website hoặc file PDF portfolio theo đúng JD này."
+    "portfolioBody": "Đánh giá GitHub, website hoặc file PDF portfolio theo đúng JD này.",
+    "projects": "Dự án từ GitHub",
+    "projectsBody": "Bổ sung các dự án mới trên GitHub vào CV, viết theo đúng JD này."
   },
   "role": {
     "title": "Phân tích role",
@@ -531,6 +539,48 @@
       "too_many_pages": "File PDF dài hơn 100 trang.",
       "file_type": "Chỉ hỗ trợ file PDF.",
       "file_too_large": "File PDF vượt quá 4 MB."
+    }
+  },
+  "projects": {
+    "title": "Dự án từ GitHub",
+    "subtitle": "CV lâu chưa cập nhật? AI chọn các repo công khai hợp với JD này và viết thành mục dự án. Bạn duyệt từng dự án trước khi đưa vào CV.",
+    "back": "Quay lại kết quả phân tích",
+    "github": "Link GitHub",
+    "githubPlaceholder": "username hoặc https://github.com/username",
+    "githubHint": "Link profile để AI chọn trong các repo công khai, hoặc link một repo cụ thể. Repo riêng tư không đọc được.",
+    "generate": "Tạo dự án từ GitHub",
+    "generating": "Đang đọc GitHub và viết dự án, thường mất 30–60 giây…",
+    "generateNote": "Miễn phí, tạo một lần cho mỗi lần phân tích CV. Lần bị lỗi hoặc không ra dự án nào có thể thử lại.",
+    "running": "Dự án đang được tạo. Hãy tải lại trang sau ít phút.",
+    "failed": "Lần tạo trước bị lỗi. Bạn có thể sửa link và thử lại.",
+    "from": "Từ {source} · AI đã đọc kỹ {count} repo hợp JD nhất.",
+    "none": "Không có repo nào đủ liên quan tới JD này để đưa vào CV. Bạn có thể thử link khác, hoặc link đúng một repo để AI viết về repo đó.",
+    "progress": "{accepted}/{total} dự án đã đưa vào CV.",
+    "acceptAll": "Đưa tất cả vào CV",
+    "accept": "Đưa vào CV",
+    "reject": "Bỏ qua",
+    "undo": "Hoàn tác",
+    "accepted": "Đã đưa vào CV",
+    "rejected": "Đã bỏ qua",
+    "viewRepo": "Xem repo",
+    "technologies": "Công nghệ",
+    "reason": "Vì sao hợp JD",
+    "matched": "Đáp ứng yêu cầu",
+    "newSkills": "Kỹ năng sẽ thêm vào CV",
+    "placeholders": "Có chỗ trống như [X] cần điền số liệu thật. Bạn điền ở trang Xem & tải CV.",
+    "skipped": "Repo không dùng ({count})",
+    "cvCta": "Xem & tải CV mới",
+    "disclaimer": "AI chỉ viết từ README, mô tả và công nghệ của repo. Hãy đọc lại và sửa cho đúng với việc bạn thực sự làm trước khi nộp.",
+    "bannerPending": "Có {count} dự án mới từ GitHub đang chờ bạn duyệt.",
+    "bannerFailed": "Chưa tạo được dự án từ GitHub.",
+    "bannerCta": "Xem dự án",
+    "bannerRetry": "Thử lại",
+    "errors": {
+      "invalid_github": "Link GitHub không hợp lệ. Nhập username hoặc link dạng https://github.com/username.",
+      "github_not_found": "Không tìm thấy tài khoản hoặc repo GitHub này. Kiểm tra lại link; repo riêng tư không đọc được.",
+      "github_rate_limited": "GitHub đang giới hạn số lượt đọc. Hãy thử lại sau ít phút.",
+      "github_unreachable": "Không kết nối được tới GitHub. Hãy thử lại sau.",
+      "no_repos": "Tài khoản này chưa có repo công khai nào ngoài các repo fork."
     }
   },
   "account": {

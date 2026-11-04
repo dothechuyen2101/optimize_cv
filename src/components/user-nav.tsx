@@ -4,7 +4,7 @@ import type { Dictionary } from "@/i18n/types";
 import { signOut } from "@/lib/auth/actions";
 import { getSessionUser } from "@/lib/auth/session";
 
-export const NAV_LINK = "rounded-lg px-3 py-2 font-medium text-subtle hover:bg-soft hover:text-foreground";
+export const NAV_LINK = "rounded-lg px-2 py-2 font-medium whitespace-nowrap text-subtle hover:bg-soft hover:text-foreground sm:px-3";
 
 export async function UserNav({ locale, nav }: { locale: Locale; nav: Dictionary["nav"] }) {
   const user = await getSessionUser();

@@ -1,6 +1,7 @@
 import type { Analysis } from "@/lib/ai/schemas/analysis";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { Choices } from "@/lib/analysis/types";
+import { containsTerm, normalizeText } from "@/lib/ats/normalize";
 
 type Section = "experience" | "project";
 
@@ -11,6 +12,17 @@ export interface Revision {
   changed: Set<string>;
   /** Accepted suggestions, by index, whose original line isn't in the resume. */
   unplaced: number[];
+  /** Projects written from GitHub, put before the resume's own: their proposal indexes, in order. */
+  githubProjects: number[];
+  /** Skills those projects added to the end of the skills list. */
+  addedSkills: string[];
+}
+
+/** An accepted project from the user's GitHub, with the skills it adds. */
+export interface GithubAddition {
+  index: number;
+  project: Resume["projects"][number];
+  skills: string[];
 }
 
 export const SUMMARY_LINE = "summary";
@@ -43,7 +55,12 @@ function locate(resume: Resume, section: Section, itemIndex: number, bulletIndex
   return null;
 }
 
-export function reviseResume(resume: Resume, analysis: Analysis, choices: Choices): Revision {
+export function reviseResume(
+  resume: Resume,
+  analysis: Analysis,
+  choices: Choices,
+  github: GithubAddition[] = [],
+): Revision {
   const revised = structuredClone(resume);
   const changed = new Set<string>();
   const unplaced: number[] = [];
@@ -70,5 +87,13 @@ export function reviseResume(resume: Resume, analysis: Analysis, choices: Choice
     changed.add(SUMMARY_LINE);
   }
 
-  return { resume: revised, changed, unplaced };
+  // After the suggestions, whose positions refer to the resume's own projects.
+  revised.projects = [...github.map((added) => added.project), ...revised.projects];
+  const addedSkills: string[] = [];
+  for (const skill of github.flatMap((added) => added.skills)) {
+    if (!containsTerm(normalizeText([...revised.skills, ...addedSkills].join(" , ")), skill)) addedSkills.push(skill);
+  }
+  revised.skills = [...revised.skills, ...addedSkills];
+
+  return { resume: revised, changed, unplaced, githubProjects: github.map((added) => added.index), addedSkills };
 }

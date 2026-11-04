@@ -10,11 +10,11 @@ export function SiteHeader({ locale, nav }: { locale: Locale; nav: Dictionary["n
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
-        <Link href={`/${locale}`} className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
+        <Link href={`/${locale}`} aria-label={nav.brand} className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
           <LogoMark />
-          {nav.brand}
+          <span className="hidden min-[360px]:inline">{nav.brand}</span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-0.5 text-sm sm:gap-1">
           <Link href={`/${locale}/analyze`} className={`hidden sm:block ${NAV_LINK}`}>
             {nav.analyze}
           </Link>

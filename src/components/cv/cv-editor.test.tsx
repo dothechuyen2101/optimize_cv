@@ -23,6 +23,7 @@ function render(edits: CvEdits) {
       document={buildCvDocument(revision)}
       initialEdits={edits}
       appliedCount={revision.changed.size}
+      githubCount={0}
       unplacedCount={0}
       showPhotoNote={false}
       locale="vi"

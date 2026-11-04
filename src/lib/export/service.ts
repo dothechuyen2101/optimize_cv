@@ -8,6 +8,7 @@ import { sha256Hex } from "@/lib/analysis/keys";
 import type { Stored } from "@/lib/analysis/run-analysis";
 import { getAnalysisReport, isUuid } from "@/lib/analysis/service";
 import { scoreAts, type AtsResult, type Market } from "@/lib/ats/score";
+import { acceptedGithubProjects } from "@/lib/projects/service";
 import {
   CV_KEY_PATTERN,
   MAX_CV_TEXT,
@@ -19,16 +20,19 @@ import {
 } from "./document";
 import { reviseResume } from "./revise";
 
-/** The user's own analysis with its suggestions applied, laid out as a CV, plus their hand edits. */
+/** The user's own analysis with its suggestions and GitHub projects applied, laid out as a CV, plus their hand edits. */
 export async function loadCvExport(userId: string, analysisId: string) {
   const found = await getAnalysisReport(userId, analysisId);
   if (!found) return null;
 
-  const rows = await getDb()
-    .select({ key: cvEdits.key, base: cvEdits.base, value: cvEdits.value })
-    .from(cvEdits)
-    .where(eq(cvEdits.analysisId, analysisId));
-  const revision = reviseResume(found.report.resume, found.report.analysis, found.choices);
+  const [rows, github] = await Promise.all([
+    getDb()
+      .select({ key: cvEdits.key, base: cvEdits.base, value: cvEdits.value })
+      .from(cvEdits)
+      .where(eq(cvEdits.analysisId, analysisId)),
+    acceptedGithubProjects(analysisId),
+  ]);
+  const revision = reviseResume(found.report.resume, found.report.analysis, found.choices, github);
   const edits: CvEdits = Object.fromEntries(rows.map(({ key, base, value }) => [key, { base, value }]));
   return { report: found.report, revision, document: buildCvDocument(revision), edits };
 }

@@ -11,9 +11,12 @@ export function LanguageSwitcherLink({ locale, label, href }: { locale: Locale; 
     <Link
       href={href ?? `/${target}`}
       hrefLang={target}
-      className="ml-1 rounded-lg border border-line px-3 py-1.5 font-medium text-subtle hover:border-primary/40 hover:bg-soft hover:text-foreground"
+      aria-label={label}
+      className="ml-1 rounded-lg border border-line px-2 py-1.5 font-medium whitespace-nowrap text-subtle hover:border-primary/40 hover:bg-soft hover:text-foreground sm:px-3"
     >
-      {label}
+      {/* Phones have no room for the name next to the signed-in links. */}
+      <span className="sm:hidden">{target.toUpperCase()}</span>
+      <span className="hidden sm:inline">{label}</span>
     </Link>
   );
 }

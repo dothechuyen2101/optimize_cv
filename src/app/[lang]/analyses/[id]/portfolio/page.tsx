@@ -47,7 +47,7 @@ async function Setup({ params }: { params: PageProps<"/[lang]/analyses/[id]/port
           <h2 className="text-lg font-semibold">{dict.previous}</h2>
           <ul className="mt-3 grid gap-3">
             {previous.map((review) => (
-              <li key={review.id}>
+              <li key={review.id} className="min-w-0">
                 <Link
                   href={`/${locale}/portfolio/${review.id}`}
                   className="flex items-center justify-between gap-4 rounded-xl border border-line bg-card px-5 py-4 hover:border-primary"

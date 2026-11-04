@@ -42,7 +42,7 @@ async function InterviewList({ locale, dict }: { locale: Locale; dict: Dictionar
       ) : (
         <ul className="mt-6 grid gap-3">
           {items.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="min-w-0">
               <Link
                 href={`/${locale}/interviews/${item.id}`}
                 className="flex items-center justify-between gap-4 rounded-xl border border-line bg-card px-5 py-4 hover:border-primary"

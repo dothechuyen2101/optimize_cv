@@ -11,6 +11,7 @@ import {
   type AnalysisStage,
   type SavedJob,
 } from "@/lib/analysis/types";
+import { parseGithubTarget } from "@/lib/portfolio/github-target";
 
 export interface AnalyzeFormValues {
   file: File;
@@ -18,6 +19,8 @@ export interface AnalyzeFormValues {
   market: "auto" | "vn" | "international";
   /** The earlier analysis of the same JD to compare the result with. */
   parent?: string;
+  /** A GitHub profile or repository to write resume projects from, after the analysis. */
+  github?: string;
 }
 
 /** A JD from the user's history, listed without its text. */
@@ -31,6 +34,7 @@ export interface SavedJobOption {
 const ACCEPT = ".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
 const MAX_BYTES = 5 * 1024 * 1024;
 const STAGES: AnalysisStage[] = ["parsing", "scoring", "analyzing"];
+const STAGES_WITH_GITHUB: AnalysisStage[] = [...STAGES, "github"];
 
 interface Props {
   dict: Dictionary["analyze"];
@@ -49,6 +53,8 @@ export function AnalyzeForm({ dict, running, locked, stage, error, savedJobs, in
   const [file, setFile] = useState<File | null>(null);
   const [jd, setJd] = useState(initialJob?.jd ?? "");
   const [market, setMarket] = useState<AnalyzeFormValues["market"]>(initialJob?.market ?? "auto");
+  const [github, setGithub] = useState("");
+  const [githubInvalid, setGithubInvalid] = useState(false);
   const [job, setJob] = useState<SavedJob | null>(initialJob);
   const [selected, setSelected] = useState(
     savedJobs.some((option) => option.analysisId === initialJob?.analysisId) ? (initialJob?.analysisId ?? "") : "",
@@ -106,10 +112,15 @@ export function AnalyzeForm({ dict, running, locked, stage, error, savedJobs, in
             ? "jd_too_long"
             : null;
     setLocalError(problem);
-    if (!problem && file) onSubmit({ file, jd: trimmed, market, parent: job?.analysisId });
+    const invalid = github.trim() !== "" && !parseGithubTarget(github);
+    setGithubInvalid(invalid);
+    if (!problem && !invalid && file) {
+      onSubmit({ file, jd: trimmed, market, parent: job?.analysisId, github: github.trim() || undefined });
+    }
   }
 
   const shownError = localError ?? error;
+  const stages = github.trim() ? STAGES_WITH_GITHUB : STAGES;
 
   return (
     <form onSubmit={submit} className="grid gap-6">
@@ -150,6 +161,25 @@ export function AnalyzeForm({ dict, running, locked, stage, error, savedJobs, in
               <option value="vn">{dict.marketVn}</option>
               <option value="international">{dict.marketIntl}</option>
             </select>
+          </label>
+
+          <label className="mt-4 grid gap-2">
+            <span className="text-sm font-medium">{dict.github}</span>
+            <input
+              value={github}
+              disabled={running}
+              onChange={(event) => {
+                setGithub(event.target.value);
+                setGithubInvalid(false);
+              }}
+              placeholder={dict.githubPlaceholder}
+              autoComplete="url"
+              aria-invalid={githubInvalid}
+              className={`rounded-lg border bg-card px-3 py-2 text-sm ${githubInvalid ? "border-danger" : "border-line"}`}
+            />
+            <span className={`text-xs ${githubInvalid ? "text-danger" : "text-subtle"}`}>
+              {githubInvalid ? dict.githubInvalid : dict.githubHint}
+            </span>
           </label>
         </div>
 
@@ -212,8 +242,8 @@ export function AnalyzeForm({ dict, running, locked, stage, error, savedJobs, in
         </button>
         {running && (
           <ol className="flex flex-wrap gap-3 text-sm" aria-live="polite">
-            {STAGES.map((item) => {
-              const reached = stage !== null && STAGES.indexOf(item) <= STAGES.indexOf(stage);
+            {stages.map((item) => {
+              const reached = stage !== null && stages.indexOf(item) <= stages.indexOf(stage);
               return (
                 <li key={item} className={reached ? "font-medium text-foreground" : "text-subtle"}>
                   {item === stage ? "● " : reached ? "✓ " : "○ "}

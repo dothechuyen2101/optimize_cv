@@ -4,10 +4,10 @@ import {
   fetchGithub,
   fetchPublicPage,
   htmlToText,
-  parseGithubTarget,
   type GithubSummary,
   type PageText,
 } from "./fetch";
+import { parseGithubTarget } from "./github-target";
 
 export type SourceError = SourceFetchError["code"];
 

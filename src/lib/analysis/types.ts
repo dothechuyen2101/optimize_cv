@@ -3,7 +3,8 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { AtsResult, Market } from "@/lib/ats/score";
 
-export type AnalysisStage = "parsing" | "scoring" | "analyzing";
+/** Steps of an analysis as the form shows them; "github" runs after it when the user gave a link. */
+export type AnalysisStage = "parsing" | "scoring" | "analyzing" | "github";
 
 /** A completed analysis as the result page shows it. */
 export interface AnalysisReport {

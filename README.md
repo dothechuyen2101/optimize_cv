@@ -21,6 +21,7 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Phân tích role: giải mã JD, yêu cầu bắt buộc/ưu tiên, vòng phỏng vấn, câu hỏi luyện tập (miễn phí, 1 lần mỗi phân tích CV) | Xong |
 | Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (free 2 buổi/tháng) | Xong |
 | Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
+| Dự án từ GitHub: AI chọn repo hợp JD, viết thành mục dự án, người dùng duyệt rồi đưa vào CV mới (miễn phí, 1 lần mỗi phân tích) | Xong |
 | Trang Tài khoản: lượt dùng tháng này, tải toàn bộ dữ liệu (JSON), xoá tài khoản và dữ liệu (Nghị định 13, GDPR) | Xong |
 | Giới hạn tần suất gọi AI: 40 lần / 10 phút mỗi user | Xong |
 | Tài khoản không giới hạn theo danh sách email trong env (`UNLIMITED_EMAILS`) | Xong |
@@ -169,6 +170,33 @@ Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng 
 
 Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi không đọc được nguồn nào (khi đó không gọi AI).
 
+### Dự án từ GitHub (CV mới từ CV cũ + GitHub)
+
+Dành cho CV lâu chưa cập nhật dự án. Có hai cách bắt đầu:
+- **Form phân tích:** ô "Link GitHub (không bắt buộc)". Phân tích xong, trình duyệt gọi tiếp bước GitHub rồi mới mở trang kết quả.
+- **Phân tích có sẵn:** thẻ "Dự án từ GitHub" trên trang kết quả, dẫn tới `/[lang]/analyses/[id]/projects`.
+
+`POST /api/analyses/[id]/projects` với `{ github, lang }` ([route](src/app/api/analyses/[id]/projects/route.ts)):
+1. Lấy tối đa 100 repo công khai, không tính fork, gần đây nhất trước; nếu link trỏ tới một repo cụ thể thì chỉ lấy repo đó.
+2. Code xếp hạng ([src/lib/projects/select.ts](src/lib/projects/select.ts)):
+   - repo có kỹ năng và từ khoá của JD trong tên, mô tả, ngôn ngữ hoặc topic được ưu tiên (bắt buộc ×3, ưu tiên ×2, keyword ×1), sau đó tới độ mới và độ đầy đủ;
+   - bỏ repo profile README, dotfiles và các dự án CV đã có;
+   - giữ 8 repo và đọc 2500 ký tự đầu README của từng repo.
+3. Step `github_projects` (hạng `strong`) chọn tối đa 4 repo và viết mỗi repo thành một mục dự án: tên, mô tả, công nghệ, 2–4 bullet, yêu cầu JD đáp ứng, lý do, kỹ năng mới.
+   - Chỉ được viết từ README, mô tả, topic và ngôn ngữ của repo.
+   - Số liệu không có thì để chỗ trống `[X]`.
+   - Nội dung CV viết theo ngôn ngữ của CV; phần giải thích viết theo ngôn ngữ giao diện.
+4. Code giữ lại các dự án ứng với repo đã gửi cho AI (mỗi repo một lần) và bỏ kỹ năng CV đã có. Kết quả lưu ở bảng `project_imports`.
+
+Người dùng chấp nhận hoặc bỏ qua từng dự án; lựa chọn lưu ở cột `decisions`. Dự án được chấp nhận:
+- đứng đầu mục "Dự án" của CV đã sửa, dòng phụ là link repo;
+- có kỹ năng mới được thêm vào cuối mục Kỹ năng;
+- được tô xanh trong bản xem trước.
+
+Key của dự án trong tài liệu là `projects.gh<số thứ tự đề xuất>`, nên chỗ sửa tay vẫn gắn đúng dự án khi người dùng hoàn tác dự án khác. Chấm lại ATS, phân tích lại và file PDF/DOCX đều dùng CV đã có các dự án này.
+
+Miễn phí, một lần cho mỗi bản phân tích (giống phân tích role); lần lỗi hoặc không ra dự án nào có thể thử lại, kể cả với link khác. Khi link trỏ tới đúng một repo, AI viết về repo đó kể cả khi độ phù hợp không cao và nói rõ trong phần lý do, trừ khi repo trống. Nên đặt `GITHUB_TOKEN`: mỗi lần chạy gọi GitHub API khoảng 9 lần.
+
 ### Tài khoản, dữ liệu cá nhân và giới hạn
 
 - `/[lang]/account` hiển thị gói và lượt dùng tháng này của từng tính năng.
@@ -208,6 +236,7 @@ src/
   lib/export/             ghép gợi ý vào CV, xuất PDF/DOCX, font nhúng
   lib/role/, lib/interview/   phân tích role, phiên luyện phỏng vấn và quota
   lib/portfolio/          đọc GitHub/website an toàn (chống SSRF), review portfolio và quota
+  lib/projects/           dự án từ GitHub: xếp hạng repo, lọc kết quả AI, lựa chọn của người dùng
   db/                     schema Drizzle và migrations
 ```
 

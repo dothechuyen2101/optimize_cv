@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchPublicPage, htmlToText, isPublicAddress, parseGithubTarget } from "./fetch";
+import { fetchPublicPage, htmlToText, isPublicAddress } from "./fetch";
+import { parseGithubTarget } from "./github-target";
 
 vi.mock("server-only", () => ({}));
 

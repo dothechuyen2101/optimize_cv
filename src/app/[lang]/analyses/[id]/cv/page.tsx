@@ -32,6 +32,7 @@ async function RevisedCv({ params }: { params: PageProps<"/[lang]/analyses/[id]/
         document={cv.document}
         initialEdits={cv.edits}
         appliedCount={cv.revision.changed.size}
+        githubCount={cv.revision.githubProjects.length}
         unplacedCount={cv.revision.unplaced.length}
         showPhotoNote={resume.has_photo || resume.has_date_of_birth}
         locale={locale}

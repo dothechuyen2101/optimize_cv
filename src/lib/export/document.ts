@@ -37,7 +37,7 @@ export interface CvText {
   key: string;
   /** Empty when the resume has no such field or the user cleared it. */
   text: string;
-  /** Rewritten by a suggestion the user accepted. */
+  /** Rewritten by a suggestion the user accepted, or added from their GitHub. */
   changed: boolean;
   /** Edited by hand on the preview page. */
   edited: boolean;
@@ -114,7 +114,7 @@ function entry(key: string, fields: EntryFields): CvEntry {
   };
 }
 
-export function buildCvDocument({ resume, changed }: Revision): CvDocument {
+export function buildCvDocument({ resume, changed, githubProjects, addedSkills }: Revision): CvDocument {
   const language: CvLanguage = resume.detected_language === "vi" ? "vi" : "en";
   const labels = LABELS[language];
   const sections: CvSection[] = [];
@@ -145,8 +145,12 @@ export function buildCvDocument({ resume, changed }: Revision): CvDocument {
   add(
     "projects",
     labels.projects,
-    resume.projects.map((project, item) =>
-      entry(`projects.${item}`, {
+    resume.projects.map((project, item) => {
+      // Projects from GitHub come first and are keyed by proposal, so hand edits stay with
+      // the right project when others are accepted or undone.
+      const fromGithub = item < githubProjects.length;
+      const own = item - githubProjects.length;
+      return entry(fromGithub ? `projects.gh${githubProjects[item]}` : `projects.${own}`, {
         title: project.name,
         subtitle: project.role,
         paragraphs: [
@@ -154,9 +158,10 @@ export function buildCvDocument({ resume, changed }: Revision): CvDocument {
           ...(project.technologies.length > 0 ? [`${labels.technologies}: ${project.technologies.join(", ")}`] : []),
         ],
         bullets: project.bullets,
-        bulletChanged: (bullet) => changed.has(lineKey("project", item, bullet)),
-      }),
-    ),
+        paragraphsChanged: fromGithub,
+        bulletChanged: (bullet) => fromGithub || changed.has(lineKey("project", own, bullet)),
+      });
+    }),
   );
 
   add(
@@ -172,7 +177,11 @@ export function buildCvDocument({ resume, changed }: Revision): CvDocument {
     ),
   );
 
-  if (resume.skills.length > 0) add("skills", labels.skills, [entry("skills.0", { paragraphs: [resume.skills.join(", ")] })]);
+  if (resume.skills.length > 0) {
+    add("skills", labels.skills, [
+      entry("skills.0", { paragraphs: [resume.skills.join(", ")], paragraphsChanged: addedSkills.length > 0 }),
+    ]);
+  }
   if (resume.certifications.length > 0) {
     add("certifications", labels.certifications, [entry("certifications.0", { bullets: resume.certifications })]);
   }

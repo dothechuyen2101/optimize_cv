@@ -195,6 +195,10 @@
     "marketAuto": "Detect from the JD",
     "marketVn": "Vietnam",
     "marketIntl": "International",
+    "github": "GitHub link (optional)",
+    "githubPlaceholder": "username or https://github.com/username",
+    "githubHint": "Resume missing your recent projects? AI picks public repositories that fit the job and writes them up for you to review. Free.",
+    "githubInvalid": "That GitHub link isn't valid. Enter a username or a link like https://github.com/username.",
     "submit": "Analyze",
     "submitting": "Analyzing…",
     "quotaLeft": "{remaining}/{limit} free analyses left this month.",
@@ -202,7 +206,8 @@
     "progress": {
       "parsing": "Reading your resume and the JD…",
       "scoring": "Scoring ATS match…",
-      "analyzing": "AI is analyzing and writing suggestions…"
+      "analyzing": "AI is analyzing and writing suggestions…",
+      "github": "Reading GitHub and writing projects…"
     },
     "errors": {
       "missing_file": "Please choose a resume file.",
@@ -314,7 +319,7 @@
   },
   "cv": {
     "title": "Revised resume",
-    "subtitle": "Your resume with the suggestions you accepted, in a single-column ATS-friendly layout.",
+    "subtitle": "Your resume with the suggestions and GitHub projects you accepted, in a single-column ATS-friendly layout.",
     "back": "Back to the analysis",
     "downloadPdf": "Download PDF",
     "downloadDocx": "Download Word (DOCX)",
@@ -352,7 +357,8 @@
     "rescoreNote": "The ATS score is computed by code, against the same JD and criteria as the first time. For a new verdict and suggestions, re-analyze with AI.",
     "rescoreFailed": "Couldn't rescore. Please try again.",
     "reuploadHint": "Downloaded the resume and edited it in Word or elsewhere?",
-    "reupload": "Upload the revised CV for this JD"
+    "reupload": "Upload the revised CV for this JD",
+    "githubAdded": "Added {count} projects from GitHub."
   },
   "nextSteps": {
     "title": "Next steps",
@@ -361,7 +367,9 @@
     "interview": "Practice interview",
     "interviewBody": "A mock interview by chat with AI, based on this CV and JD, with feedback and a score.",
     "portfolio": "Portfolio review",
-    "portfolioBody": "Review your GitHub, website or portfolio PDF against this JD."
+    "portfolioBody": "Review your GitHub, website or portfolio PDF against this JD.",
+    "projects": "Projects from GitHub",
+    "projectsBody": "Add your recent GitHub projects to your resume, written for this job."
   },
   "role": {
     "title": "Role analysis",
@@ -531,6 +539,48 @@
       "too_many_pages": "The PDF is longer than 100 pages.",
       "file_type": "Only PDF files are supported.",
       "file_too_large": "The PDF is larger than 4 MB."
+    }
+  },
+  "projects": {
+    "title": "Projects from GitHub",
+    "subtitle": "Resume out of date? AI picks the public repositories that fit this job and writes them up as resume projects. You review each one before it goes into your resume.",
+    "back": "Back to the analysis",
+    "github": "GitHub link",
+    "githubPlaceholder": "username or https://github.com/username",
+    "githubHint": "A profile link lets AI choose among your public repositories; a repository link uses just that one. Private repositories can't be read.",
+    "generate": "Write projects from GitHub",
+    "generating": "Reading GitHub and writing projects, usually 30–60 seconds…",
+    "generateNote": "Free, once per resume analysis. An attempt that fails or finds nothing can be retried.",
+    "running": "Your projects are being written. Reload the page in a few minutes.",
+    "failed": "The last attempt failed. You can fix the link and try again.",
+    "from": "From {source} · AI read the {count} repositories that fit the job best.",
+    "none": "None of the repositories is relevant enough to this job to add to your resume. Try another link, or link one repository to have AI write about that one.",
+    "progress": "{accepted}/{total} projects added to your resume.",
+    "acceptAll": "Add all to resume",
+    "accept": "Add to resume",
+    "reject": "Skip",
+    "undo": "Undo",
+    "accepted": "Added to resume",
+    "rejected": "Skipped",
+    "viewRepo": "View repository",
+    "technologies": "Technologies",
+    "reason": "Why it fits the job",
+    "matched": "Covers",
+    "newSkills": "Skills added to your resume",
+    "placeholders": "Has gaps like [X] to fill with real numbers. Fill them in on the resume page.",
+    "skipped": "Repositories not used ({count})",
+    "cvCta": "View & download the new resume",
+    "disclaimer": "AI writes only from each repository's README, description and technologies. Read it over and correct it to match what you actually did before you apply.",
+    "bannerPending": "{count} new projects from your GitHub are waiting for your review.",
+    "bannerFailed": "Projects from GitHub couldn't be written.",
+    "bannerCta": "Review projects",
+    "bannerRetry": "Try again",
+    "errors": {
+      "invalid_github": "That GitHub link isn't valid. Enter a username or a link like https://github.com/username.",
+      "github_not_found": "No GitHub account or repository found at that link. Check it; private repositories can't be read.",
+      "github_rate_limited": "GitHub is limiting requests right now. Try again in a few minutes.",
+      "github_unreachable": "GitHub couldn't be reached. Try again later.",
+      "no_repos": "This account has no public repositories other than forks."
     }
   },
   "account": {

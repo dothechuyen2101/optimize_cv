@@ -50,6 +50,43 @@ describe("buildCvDocument", () => {
     expect(cvTexts(vietnameseDocument({ bullets: {}, summary: null })).map((t) => t.key)).toEqual(keys);
   });
 
+  it("keys GitHub projects by proposal and marks them and the added skills as new", () => {
+    const resume = makeResume({
+      projects: [{ name: "Wallet", role: null, description: null, bullets: ["Built the wallet API"], technologies: [] }],
+    });
+    const github = (index: number, name: string) => ({
+      index,
+      project: { name, role: `github.com/a/${name}`, description: "A tool.", bullets: ["Built it"], technologies: ["Go"] },
+      skills: ["Kafka"],
+    });
+    const doc = buildCvDocument(
+      reviseResume(resume, makeAnalysis(), { bullets: {}, summary: null }, [github(3, "orders"), github(1, "chat")]),
+    );
+    const projects = doc.sections.find((s) => s.key === "projects")!;
+
+    expect(projects.entries.map((e) => [e.title.key, e.title.text, e.subtitle.text])).toEqual([
+      ["projects.gh3.title", "orders", "github.com/a/orders"],
+      ["projects.gh1.title", "chat", "github.com/a/chat"],
+      ["projects.0.title", "Wallet", ""],
+    ]);
+    expect(projects.entries[0].bullets[0]).toMatchObject({ key: "projects.gh3.b.0", changed: true });
+    expect(projects.entries[0].paragraphs.every((p) => p.changed)).toBe(true);
+    expect(projects.entries[2].bullets[0].changed).toBe(false);
+    const skills = doc.sections.find((s) => s.key === "skills")!.entries[0].paragraphs[0];
+    expect(skills).toMatchObject({ text: "Node.js, TypeScript, PostgreSQL, Docker, Kafka", changed: true });
+
+    // A hand edit stays with its project when an earlier one is undone.
+    const edit = { "projects.gh1.b.0": { base: "Built it", value: "Built the chat server" } };
+    const later = buildCvDocument(reviseResume(resume, makeAnalysis(), { bullets: {}, summary: null }, [github(1, "chat")]));
+    const edited = applyCvEdits(later, edit);
+    expect(edited.sections.find((s) => s.key === "projects")!.entries[0].bullets[0].text).toBe("Built the chat server");
+    const revision = reviseResume(resume, makeAnalysis(), { bullets: {}, summary: null }, [github(1, "chat")]);
+    expect(resumeFromDocument(revision.resume, edited).projects.map((p) => p.bullets)).toEqual([
+      ["Built the chat server"],
+      ["Built the wallet API"],
+    ]);
+  });
+
   it("uses English headings for other languages", () => {
     const doc = buildCvDocument(reviseResume(makeResume(), makeAnalysis(), { bullets: {}, summary: null }));
     expect(doc.sections[1]).toMatchObject({ heading: "Experience", entries: [{ dates: { text: "2021 – Present" } }] });

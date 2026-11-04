@@ -6,7 +6,7 @@ import { getAnalysisReport, recordUsage } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
 import { isRateLimited } from "@/lib/billing/rate-limit";
 import { CvFileRejected, MAX_PDF_PAGES, readPdfFile } from "@/lib/parsing/cv-document";
-import { parseGithubTarget } from "@/lib/portfolio/fetch";
+import { parseGithubTarget } from "@/lib/portfolio/github-target";
 import { completePortfolioReview, failPortfolioReview, reservePortfolioReview } from "@/lib/portfolio/service";
 import { isReadable, readSources } from "@/lib/portfolio/sources";
 import { MAX_PORTFOLIO_PDF_BYTES, MAX_PORTFOLIO_URLS, type PortfolioErrorCode } from "@/lib/portfolio/types";

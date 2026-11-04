@@ -41,6 +41,15 @@ export function AnalyzeWorkspace({ locale, dict, quota, savedJobs, initialJob }:
       setState({ status: "idle", error: outcome.error });
       return;
     }
+    if (values.github) {
+      setState({ status: "running", stage: "github" });
+      // The result page shows how it went, with a retry if it failed, so the outcome isn't checked here.
+      await fetch(`/api/analyses/${outcome.analysisId}/projects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ github: values.github, lang: locale }),
+      }).catch(() => {});
+    }
     setState({ status: "opening" });
     router.push(`/${locale}/analyses/${outcome.analysisId}`);
   }

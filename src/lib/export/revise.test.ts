@@ -85,4 +85,25 @@ describe("reviseResume", () => {
     const noSummary = makeResume({ summary: null });
     expect(reviseResume(noSummary, analysis, choices({}, { decision: "accepted", text: "Mine" })).resume.summary).toBe("Mine");
   });
+
+  it("puts accepted GitHub projects first and adds their new skills once", () => {
+    const own = { name: "Wallet", role: null, description: null, bullets: ["Built the wallet API"], technologies: [] };
+    const fromGithub = (name: string) => ({ name, role: `github.com/a/${name}`, description: null, bullets: ["Built it"], technologies: [] });
+    const analysis = makeAnalysis({
+      bullet_suggestions: [suggestion({ section: "project", original: "Built the wallet API", proposed: "Built the wallet API in Go" })],
+    });
+    const revision = reviseResume(makeResume({ projects: [own] }), analysis, choices({ 0: accepted }), [
+      { index: 2, project: fromGithub("orders"), skills: ["Kubernetes", "TypeScript"] },
+      { index: 0, project: fromGithub("chat"), skills: ["kubernetes", "Kafka"] },
+    ]);
+
+    expect(revision.resume.projects.map((p) => p.name)).toEqual(["orders", "chat", "Wallet"]);
+    // The suggestion's position refers to the resume's own project.
+    expect(revision.resume.projects[2].bullets).toEqual(["Built the wallet API in Go"]);
+    expect(revision.changed.has(lineKey("project", 0, 0))).toBe(true);
+    expect(revision.githubProjects).toEqual([2, 0]);
+    // TypeScript is already listed; Kubernetes comes once.
+    expect(revision.addedSkills).toEqual(["Kubernetes", "Kafka"]);
+    expect(revision.resume.skills).toEqual(["Node.js", "TypeScript", "PostgreSQL", "Docker", "Kubernetes", "Kafka"]);
+  });
 });

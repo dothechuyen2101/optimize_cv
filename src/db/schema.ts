@@ -21,6 +21,7 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { RoleReport } from "@/lib/ai/schemas/role";
 import type { AtsResult } from "@/lib/ats/score";
+import type { ProjectDecisions, ProjectImportResult } from "@/lib/projects/types";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
@@ -212,6 +213,23 @@ export const roleReports = pgTable("role_reports", {
   // "running" holds the slot while the model works, so a double click can't generate twice.
   status: analysisStatusEnum("status").notNull().default("running"),
   result: jsonb("result").$type<RoleReport>(),
+  promptVersion: text("prompt_version").notNull(),
+  errorCode: text("error_code"),
+  createdAt: createdAt(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}).enableRLS();
+
+// Resume projects written from the user's GitHub repositories for one analysis. Generated once,
+// like the role report; the user then accepts or skips each proposal into the revised CV.
+export const projectImports = pgTable("project_imports", {
+  analysisId: uuid("analysis_id")
+    .primaryKey()
+    .references(() => analyses.id, { onDelete: "cascade" }),
+  status: analysisStatusEnum("status").notNull().default("running"),
+  /** The GitHub link as the user gave it. */
+  source: text("source").notNull(),
+  result: jsonb("result").$type<ProjectImportResult>(),
+  decisions: jsonb("decisions").$type<ProjectDecisions>().notNull().default({}),
   promptVersion: text("prompt_version").notNull(),
   errorCode: text("error_code"),
   createdAt: createdAt(),

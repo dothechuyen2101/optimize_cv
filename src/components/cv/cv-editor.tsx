@@ -25,6 +25,8 @@ interface Props {
   document: CvDocument;
   initialEdits: CvEdits;
   appliedCount: number;
+  /** Projects added from the user's GitHub. */
+  githubCount: number;
   unplacedCount: number;
   showPhotoNote: boolean;
   locale: Locale;
@@ -39,6 +41,7 @@ export function CvEditor({
   document,
   initialEdits,
   appliedCount,
+  githubCount,
   unplacedCount,
   showPhotoNote,
   locale,
@@ -184,7 +187,14 @@ export function CvEditor({
 
       <div className="grid gap-2">
         <Notice tone="info">
-          {appliedCount > 0 ? format(dict.applied, { count: appliedCount }) : dict.noChanges}{" "}
+          {appliedCount > 0 || githubCount > 0
+            ? [
+                appliedCount > 0 && format(dict.applied, { count: appliedCount }),
+                githubCount > 0 && format(dict.githubAdded, { count: githubCount }),
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : dict.noChanges}{" "}
           {editedCount > 0 && `${format(dict.editedCount, { count: editedCount })} `}
           {dict.templateNote}
         </Notice>
@@ -199,7 +209,7 @@ export function CvEditor({
         analysisId={analysisId}
         locale={locale}
         quota={quota}
-        hasChanges={appliedCount > 0 || editedCount > 0}
+        hasChanges={appliedCount > 0 || githubCount > 0 || editedCount > 0}
         blocked={saving || editing !== null}
         dict={dict}
         analyzeDict={analyzeDict}

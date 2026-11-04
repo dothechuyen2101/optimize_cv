@@ -8,7 +8,8 @@ export type StepName =
   | "role_analysis"
   | "interview_turn"
   | "interview_report"
-  | "portfolio_review";
+  | "portfolio_review"
+  | "github_projects";
 
 export interface StepConfig {
   tier: ModelTier;
@@ -30,4 +31,5 @@ export const STEP_CONFIG: Record<StepName, StepConfig> = {
   interview_turn: { tier: "fast", effort: "low", maxTokens: 2000 },
   interview_report: { tier: "strong", effort: "medium", maxTokens: 8000 },
   portfolio_review: { tier: "strong", effort: "medium", maxTokens: 10000 },
+  github_projects: { tier: "strong", effort: "medium", maxTokens: 10000 },
 };
