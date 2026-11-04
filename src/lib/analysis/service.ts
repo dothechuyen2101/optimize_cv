@@ -20,7 +20,8 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import { parseCv } from "@/lib/ai/steps/parse-cv";
 import { parseJd } from "@/lib/ai/steps/parse-jd";
-import { PLAN_ANALYSIS_LIMITS, STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import { monthlyLimit } from "@/lib/billing/limits";
+import { STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
 import type { CvUpload } from "@/lib/parsing/cv-document";
 import type { AnalysisOutcome, Stored } from "./run-analysis";
 import {
@@ -46,7 +47,6 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 /** Runs that hold quota this month: completed, or still running and not stale. */
 async function quotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [profile] = await db.select({ plan: profiles.plan }).from(profiles).where(eq(profiles.id, userId));
   const [{ used }] = await db
     .select({ used: count() })
     .from(analyses)
@@ -60,7 +60,7 @@ async function quotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<
         ),
       ),
     );
-  return { used, limit: PLAN_ANALYSIS_LIMITS[profile?.plan ?? "free"] };
+  return { used, limit: await monthlyLimit(db, userId, "analysis") };
 }
 
 export function getQuota(userId: string): Promise<QuotaStatus> {

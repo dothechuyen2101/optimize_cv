@@ -33,3 +33,13 @@ export interface QuotaStatus {
 export function hasQuotaLeft({ used, limit }: QuotaStatus): boolean {
   return limit === null || used < limit;
 }
+
+/** Parses an email list from the environment: separated by commas, semicolons or whitespace; case-insensitive. */
+export function parseEmailList(value: string | undefined): Set<string> {
+  return new Set(
+    (value ?? "")
+      .split(/[\s,;]+/)
+      .map((email) => email.toLowerCase())
+      .filter((email) => email.includes("@")),
+  );
+}

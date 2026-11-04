@@ -538,7 +538,8 @@
     "plan": "Gói",
     "plans": {
       "free": "Miễn phí",
-      "pro": "Pro"
+      "pro": "Pro",
+      "unlimited": "Không giới hạn (tài khoản nội bộ)"
     },
     "usageTitle": "Lượt dùng tháng này",
     "usageNote": "Lượt được tính theo tháng dương lịch (giờ UTC) và làm mới vào ngày 1.",

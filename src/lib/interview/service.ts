@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, count, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { analyses, interviewSessions, interviewTurns, jobDescriptions, profiles, resumeVersions } from "@/db/schema";
+import { analyses, interviewSessions, interviewTurns, jobDescriptions, resumeVersions } from "@/db/schema";
 import type { Locale } from "@/i18n/config";
 import { INTERVIEW_REPORT_PROMPT, INTERVIEW_TURN_PROMPT } from "@/lib/ai/prompts/interview";
 import type { AnswerFeedback, InterviewReport } from "@/lib/ai/schemas/interview";
@@ -9,7 +9,8 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { InterviewSettings, TranscriptEntry } from "@/lib/ai/steps/interview";
 import { isUuid } from "@/lib/analysis/service";
-import { PLAN_INTERVIEW_LIMITS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import { monthlyLimit } from "@/lib/billing/limits";
+import { hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
 
 type Db = ReturnType<typeof getDb>;
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -17,12 +18,11 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 // Every function takes the signed-in user's id and scopes its queries to it.
 
 async function interviewQuotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [profile] = await db.select({ plan: profiles.plan }).from(profiles).where(eq(profiles.id, userId));
   const [{ used }] = await db
     .select({ used: count() })
     .from(interviewSessions)
     .where(and(eq(interviewSessions.userId, userId), gte(interviewSessions.createdAt, quotaWindowStart(now))));
-  return { used, limit: PLAN_INTERVIEW_LIMITS[profile?.plan ?? "free"] };
+  return { used, limit: await monthlyLimit(db, userId, "interview") };
 }
 
 export function getInterviewQuota(userId: string): Promise<QuotaStatus> {

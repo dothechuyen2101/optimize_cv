@@ -1,11 +1,12 @@
 import "server-only";
 import { and, count, desc, eq, gt, gte, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { analyses, jobDescriptions, portfolioReviews, profiles } from "@/db/schema";
+import { analyses, jobDescriptions, portfolioReviews } from "@/db/schema";
 import { PORTFOLIO_REVIEW_PROMPT } from "@/lib/ai/prompts/portfolio-review";
 import type { PortfolioReview } from "@/lib/ai/schemas/portfolio";
 import { isUuid } from "@/lib/analysis/service";
-import { PLAN_PORTFOLIO_LIMITS, STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import { monthlyLimit } from "@/lib/billing/limits";
+import { STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
 
 type Db = ReturnType<typeof getDb>;
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -15,7 +16,6 @@ export type PortfolioInputs = (typeof portfolioReviews.$inferSelect)["sources"];
 // Like analyses, failed reviews don't count against quota; crashed ones stop counting after a while.
 
 async function portfolioQuotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [profile] = await db.select({ plan: profiles.plan }).from(profiles).where(eq(profiles.id, userId));
   const [{ used }] = await db
     .select({ used: count() })
     .from(portfolioReviews)
@@ -29,7 +29,7 @@ async function portfolioQuotaFor(db: Db | Tx, userId: string, now = new Date()):
         ),
       ),
     );
-  return { used, limit: PLAN_PORTFOLIO_LIMITS[profile?.plan ?? "free"] };
+  return { used, limit: await monthlyLimit(db, userId, "portfolio") };
 }
 
 export function getPortfolioQuota(userId: string): Promise<QuotaStatus> {

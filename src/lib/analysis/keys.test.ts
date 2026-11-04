@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeNextPath } from "@/lib/auth/next-path";
-import { hasQuotaLeft, quotaWindowStart } from "@/lib/billing/quota";
+import { hasQuotaLeft, parseEmailList, quotaWindowStart } from "@/lib/billing/quota";
 import { analysisCacheKey, jdContentHash } from "./keys";
 
 describe("jdContentHash", () => {
@@ -32,6 +32,16 @@ describe("quota", () => {
     expect(hasQuotaLeft({ used: 2, limit: 3 })).toBe(true);
     expect(hasQuotaLeft({ used: 3, limit: 3 })).toBe(false);
     expect(hasQuotaLeft({ used: 999, limit: null })).toBe(true);
+  });
+
+  it("reads the unlimited email list loosely", () => {
+    expect([...parseEmailList(" Founder@Example.com, tester@example.com;qa@example.com\nx ")]).toEqual([
+      "founder@example.com",
+      "tester@example.com",
+      "qa@example.com",
+    ]);
+    expect(parseEmailList(undefined).size).toBe(0);
+    expect(parseEmailList(" , ").size).toBe(0);
   });
 });
 

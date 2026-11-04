@@ -538,7 +538,8 @@
     "plan": "Plan",
     "plans": {
       "free": "Free",
-      "pro": "Pro"
+      "pro": "Pro",
+      "unlimited": "Unlimited (team account)"
     },
     "usageTitle": "This month's usage",
     "usageNote": "Usage counts per calendar month (UTC) and resets on the 1st.",

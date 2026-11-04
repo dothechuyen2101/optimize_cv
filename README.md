@@ -23,6 +23,7 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
 | Trang Tài khoản: lượt dùng tháng này, tải toàn bộ dữ liệu (JSON), xoá tài khoản và dữ liệu (Nghị định 13, GDPR) | Xong |
 | Giới hạn tần suất gọi AI: 40 lần / 10 phút mỗi user | Xong |
+| Tài khoản không giới hạn theo danh sách email trong env (`UNLIMITED_EMAILS`) | Xong |
 | SEO song ngữ: metadata, hreflang, robots.txt, sitemap.xml, ảnh chia sẻ (Open Graph) theo ngôn ngữ | Xong |
 | Giao diện mới: trang chủ giới thiệu đủ 4 tính năng, header dính, footer, trang đăng nhập/đăng ký mới, hiệu ứng chuyển động (tắt khi máy bật giảm chuyển động), sáng/tối | Xong |
 | Phỏng vấn bằng giọng nói (bản đầu): trả lời bằng micro (Deepgram), câu hỏi được đọc bằng giọng của trình duyệt | Xong |
@@ -179,6 +180,9 @@ Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi khôn
 - Rate limit ([src/lib/billing/rate-limit.ts](src/lib/billing/rate-limit.ts)): mỗi route gọi AI từ chối khi user đã có 40 lần gọi trong 10 phút, đếm từ `ai_usage`, trả mã `too_many_requests`.
   - Mốc thời gian tính bằng `now()` của database, cùng đồng hồ với `created_at`. Đồng hồ máy chủ app có thể lệch: một máy dev từng lệch 82 giây.
   - Khi phân tích CV, việc trả lại kết quả đã cache không bị chặn.
+- Tài khoản không giới hạn ([src/lib/billing/limits.ts](src/lib/billing/limits.ts)): email trong biến `UNLIMITED_EMAILS` (cách nhau bằng dấu phẩy, không phân biệt hoa thường) không bị trừ quota tháng của cả 3 tính năng và không bị rate limit.
+  - Chỉ tính khi email đã xác nhận (`auth.users.email_confirmed_at`), nên người đăng ký bằng email của người khác không được hưởng. Supabase chỉ đổi email của tài khoản sau khi email mới được xác nhận.
+  - Trang Tài khoản hiện gói "Không giới hạn (tài khoản nội bộ)". Đổi danh sách thì phải redeploy để có hiệu lực.
 - Mỗi lần tạo Supabase client phía server đều gọi `connection()` trước, vì Supabase Auth gọi `Date.now()` khi kiểm tra token. Nếu không, Next ghi lỗi "unstable value Date.now()" khi prerender mọi trang cần đăng nhập.
 
 ### SEO

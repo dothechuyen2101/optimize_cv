@@ -2,6 +2,7 @@ import "server-only";
 import { and, count, eq, gt, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { aiUsage } from "@/db/schema";
+import { isUnlimitedUser } from "./limits";
 
 // Quotas cap features per month; this caps bursts, so a script can't run up the AI bill
 // within a quota (an interview session alone is up to 20 calls). Counted from ai_usage,
@@ -20,5 +21,6 @@ export async function isRateLimited(userId: string): Promise<boolean> {
         gt(aiUsage.createdAt, sql`now() - make_interval(secs => ${RATE_WINDOW_SECONDS})`),
       ),
     );
-  return calls >= AI_CALLS_PER_WINDOW;
+  // Exemption is looked up only at the limit, so everyone else pays no extra query.
+  return calls >= AI_CALLS_PER_WINDOW && !(await isUnlimitedUser(userId));
 }
