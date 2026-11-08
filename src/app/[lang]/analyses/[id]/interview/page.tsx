@@ -5,7 +5,7 @@ import { InterviewSetup } from "@/components/interview/interview-setup";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getAnalysisReport } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
-import { getInterviewQuota } from "@/lib/interview/service";
+import { getQuota } from "@/lib/billing/limits";
 
 async function Setup({ params }: { params: PageProps<"/[lang]/analyses/[id]/interview">["params"] }) {
   const { id } = await params;
@@ -14,7 +14,7 @@ async function Setup({ params }: { params: PageProps<"/[lang]/analyses/[id]/inte
 
   const user = await getSessionUser();
   if (!user) redirect(`/${locale}/login?next=/${locale}/analyses/${id}/interview`);
-  const [found, quota] = await Promise.all([getAnalysisReport(user.id, id), getInterviewQuota(user.id)]);
+  const [found, quota] = await Promise.all([getAnalysisReport(user.id, id), getQuota(user.id)]);
   if (!found) notFound();
   const { job } = found.report;
 

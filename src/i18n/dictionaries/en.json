@@ -22,7 +22,7 @@
     },
     "signup": {
       "title": "Create an account",
-      "subtitle": "3 free analyses every month, no card required.",
+      "subtitle": "1 free use every month, no card required.",
       "submit": "Create account"
     },
     "forgot": {
@@ -64,7 +64,7 @@
   "history": {
     "title": "Analysis history",
     "subtitle": "Your resume analyses, newest first.",
-    "quota": "This month you've used {used}/{limit} free analyses.",
+    "quota": "Free uses this month: {used}/{limit}, shared by resume analyses, practice interviews and portfolio reviews.",
     "empty": "You haven't run any analyses yet.",
     "start": "Run your first analysis",
     "newAnalysis": "New analysis",
@@ -89,7 +89,7 @@
     "secondaryCta": "See how it works",
     "ctaNote": "Works with Vietnamese and English resumes, PDF or DOCX",
     "trust": [
-      "3 free analyses a month",
+      "1 free use a month",
       "Never invents experience",
       "No card needed"
     ],
@@ -178,7 +178,7 @@
       }
     ],
     "finalTitle": "Ready for your next interview?",
-    "finalBody": "Start with 3 free analyses every month. No card needed.",
+    "finalBody": "Start with 1 free use every month. No card needed.",
     "finalCta": "Start free"
   },
   "analyze": {
@@ -201,7 +201,7 @@
     "githubInvalid": "That GitHub link isn't valid. Enter a username or a link like https://github.com/username.",
     "submit": "Analyze",
     "submitting": "Analyzing…",
-    "quotaLeft": "{remaining}/{limit} free analyses left this month.",
+    "quotaLeft": "{remaining}/{limit} free uses left this month, shared by resume analyses, practice interviews and portfolio reviews.",
     "opening": "Opening the result…",
     "progress": {
       "parsing": "Reading your resume and the JD…",
@@ -218,7 +218,7 @@
       "jd_too_long": "The JD is too long. Trim it to the main job description.",
       "invalid_request": "Invalid request.",
       "unauthorized": "Your session expired. Please sign in again.",
-      "quota_exceeded": "You've used all your free analyses for this month.",
+      "quota_exceeded": "You've used this month's free uses (shared by resume analyses, practice interviews and portfolio reviews). They reset on the 1st.",
       "too_many_requests": "Too many requests. Please try again in a few minutes.",
       "ai_auth": "AI is not configured (missing or invalid ANTHROPIC_API_KEY).",
       "ai_rate_limited": "The service is busy. Please try again in a few minutes.",
@@ -348,7 +348,7 @@
     "rescore": "Rescore ATS (free)",
     "rescoring": "Scoring…",
     "reanalyze": "Re-analyze with AI",
-    "reanalyzeQuota": "Re-analyzing with AI gives a new verdict and suggestions and uses 1 analysis ({remaining}/{limit} left this month). If the resume hasn't changed since your last re-analysis, you'll see that result again at no cost.",
+    "reanalyzeQuota": "Re-analyzing with AI gives a new verdict and suggestions and uses 1 free use ({remaining}/{limit} left this month). If the resume hasn't changed since your last re-analysis, you'll see that result again at no cost.",
     "reanalyzeUnlimited": "Re-analyzing with AI gives a new verdict and suggestions.",
     "noChangesToAnalyze": "Accept a suggestion or edit the resume before re-analyzing with AI.",
     "finishEditing": "Save the line you're editing before re-evaluating.",
@@ -411,7 +411,7 @@
     "listEmpty": "No practice interviews yet. Open a CV analysis and choose Practice interview.",
     "listStart": "Open your analyses",
     "active": "In progress",
-    "quota": "{used}/{limit} free sessions used this month.",
+    "quota": "Free uses this month: {used}/{limit}, shared by resume analyses, practice interviews and portfolio reviews.",
     "setupTitle": "Practice interview",
     "setupSubtitle": "An AI interviewer asks one question at a time based on this analysis's CV and JD, and follows up when an answer is vague.",
     "back": "Back to the analysis",
@@ -437,7 +437,7 @@
     "feedbackHint": "Turn it off for a real-interview feel and see the feedback only at the end.",
     "start": "Start interview",
     "starting": "Preparing the first question…",
-    "quotaLeft": "{remaining}/{limit} free sessions left this month. About 6 main questions, with follow-ups.",
+    "quotaLeft": "Uses 1 free use ({remaining}/{limit} left this month, shared with resume analyses and portfolio reviews). About 6 main questions, with follow-ups.",
     "unlimited": "About 6 main questions, with follow-ups.",
     "interviewer": "Interviewer",
     "you": "You",
@@ -468,7 +468,7 @@
     "transcript": "Full transcript",
     "again": "Practice another session",
     "errors": {
-      "quota_exceeded": "You've used this month's free practice interviews.",
+      "quota_exceeded": "You've used this month's free uses (shared by resume analyses, practice interviews and portfolio reviews). They reset on the 1st.",
       "interview_over": "The interview is over.",
       "answer_empty": "Type an answer first.",
       "answer_too_long": "The answer is too long, 4000 characters at most.",
@@ -503,7 +503,7 @@
     "pdfSelected": "Selected: {name}",
     "submit": "Review portfolio",
     "submitting": "Reading and reviewing your portfolio, usually 1–2 minutes…",
-    "quotaLeft": "{remaining}/{limit} free reviews left this month. A review that can't read any source isn't counted.",
+    "quotaLeft": "Uses 1 free use ({remaining}/{limit} left this month, shared with resume analyses and practice interviews). A review that can't read any source isn't counted.",
     "unlimited": "A review that can't read any source isn't counted.",
     "previous": "Earlier reviews",
     "resultTitle": "Portfolio review",
@@ -530,7 +530,7 @@
     "again": "Review again after your changes",
     "reviewed": "Reviewed",
     "errors": {
-      "quota_exceeded": "You've used this month's free portfolio reviews.",
+      "quota_exceeded": "You've used this month's free uses (shared by resume analyses, practice interviews and portfolio reviews). They reset on the 1st.",
       "no_sources": "Add your GitHub, at least one link or a PDF.",
       "too_many_urls": "Up to 3 links per review.",
       "invalid_url": "One of the links isn't valid.",
@@ -593,6 +593,8 @@
     },
     "usageTitle": "This month's usage",
     "usageNote": "Usage counts per calendar month (UTC) and resets on the 1st.",
+    "usageShared": "Free uses per month: {limit}, shared by resume analyses, practice interviews and portfolio reviews.",
+    "quota": "Free uses",
     "usage": {
       "analysis": "CV analyses",
       "interview": "Practice interviews",

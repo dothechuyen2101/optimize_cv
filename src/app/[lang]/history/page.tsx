@@ -5,8 +5,9 @@ import { scoreTone } from "@/components/analyze/score-ring";
 import { format, type Locale } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import type { Dictionary } from "@/i18n/types";
-import { getQuota, listAnalyses, type AnalysisListItem } from "@/lib/analysis/service";
+import { listAnalyses, type AnalysisListItem } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { getQuota } from "@/lib/billing/limits";
 
 const SCORE_STYLE = {
   success: "bg-success-soft text-success",

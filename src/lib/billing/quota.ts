@@ -1,19 +1,10 @@
 export type Plan = "free" | "pro";
 
-/** Analyses per calendar month (UTC); null means unlimited. */
-export const PLAN_ANALYSIS_LIMITS: Record<Plan, number | null> = {
-  free: 3,
-  pro: null,
-};
-
-/** Practice interview sessions per calendar month (UTC). */
-export const PLAN_INTERVIEW_LIMITS: Record<Plan, number | null> = {
-  free: 2,
-  pro: null,
-};
-
-/** Portfolio reviews per calendar month (UTC). */
-export const PLAN_PORTFOLIO_LIMITS: Record<Plan, number | null> = {
+/**
+ * Uses per calendar month (UTC), shared by CV analyses, practice interviews and portfolio
+ * reviews: a free account gets one of any of them. null means unlimited.
+ */
+export const PLAN_MONTHLY_LIMITS: Record<Plan, number | null> = {
   free: 1,
   pro: null,
 };

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, gt, gte, or, sql, sum } from "drizzle-orm";
+import { and, desc, eq, sql, sum } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { getDb } from "@/db";
 import {
@@ -20,8 +20,8 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import { parseCv } from "@/lib/ai/steps/parse-cv";
 import { parseJd } from "@/lib/ai/steps/parse-jd";
-import { monthlyLimit } from "@/lib/billing/limits";
-import { STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import { lockQuota, quotaFor } from "@/lib/billing/limits";
+import { hasQuotaLeft, type QuotaStatus } from "@/lib/billing/quota";
 import type { CvUpload } from "@/lib/parsing/cv-document";
 import type { AnalysisOutcome, Stored } from "./run-analysis";
 import {
@@ -42,31 +42,6 @@ export function isUuid(value: string): boolean {
   return UUID_PATTERN.test(value);
 }
 
-type Db = ReturnType<typeof getDb>;
-type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
-
-/** Runs that hold quota this month: completed, or still running and not stale. */
-async function quotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [{ used }] = await db
-    .select({ used: count() })
-    .from(analyses)
-    .where(
-      and(
-        eq(analyses.userId, userId),
-        gte(analyses.createdAt, quotaWindowStart(now)),
-        or(
-          eq(analyses.status, "completed"),
-          and(eq(analyses.status, "running"), gt(analyses.createdAt, new Date(now.getTime() - STALE_RUN_MS))),
-        ),
-      ),
-    );
-  return { used, limit: await monthlyLimit(db, userId, "analysis") };
-}
-
-export function getQuota(userId: string): Promise<QuotaStatus> {
-  return quotaFor(getDb(), userId);
-}
-
 /** An earlier completed analysis with identical inputs, which can be shown without new AI calls. */
 export async function findCachedAnalysis(userId: string, cacheKey: string): Promise<string | null> {
   const [row] = await getDb()
@@ -79,8 +54,8 @@ export async function findCachedAnalysis(userId: string, cacheKey: string): Prom
 }
 
 /**
- * Creates the analysis row in "running" state if the user has quota left. A
- * per-user advisory lock makes the check and the insert atomic, so parallel
+ * Creates the analysis row in "running" state if the user has quota left. The
+ * per-user quota lock makes the check and the insert atomic, so parallel
  * requests can't overspend.
  */
 export function reserveAnalysis(
@@ -88,7 +63,7 @@ export function reserveAnalysis(
   run: { cacheKey: string; uiLocale: Locale; promptVersions: string[]; parentId?: string },
 ): Promise<{ id: string } | { quota: QuotaStatus }> {
   return getDb().transaction(async (tx) => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
+    await lockQuota(tx, userId);
     await tx.insert(profiles).values({ id: userId }).onConflictDoNothing();
     const quota = await quotaFor(tx, userId);
     if (!hasQuotaLeft(quota)) return { quota };

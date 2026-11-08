@@ -4,8 +4,9 @@ import { AnalyzeWorkspace } from "@/components/analyze/analyze-workspace";
 import type { Locale } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import type { Dictionary } from "@/i18n/types";
-import { getQuota, getSavedJob, listSavedJobs } from "@/lib/analysis/service";
+import { getSavedJob, listSavedJobs } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { getQuota } from "@/lib/billing/limits";
 
 interface WorkspaceProps {
   locale: Locale;

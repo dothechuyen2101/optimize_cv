@@ -16,20 +16,15 @@ import {
   suggestionDecisions,
   summaryDecisions,
 } from "@/db/schema";
-import { getQuota } from "@/lib/analysis/service";
-import { isUnlimitedUser } from "@/lib/billing/limits";
-import { getInterviewQuota } from "@/lib/interview/service";
-import { getPortfolioQuota } from "@/lib/portfolio/service";
+import { getQuotaWithUsage, isUnlimitedUser } from "@/lib/billing/limits";
 
 export async function accountOverview(userId: string) {
-  const [[profile], unlimited, analysis, interview, portfolio] = await Promise.all([
+  const [[profile], unlimited, { quota, usage }] = await Promise.all([
     getDb().select({ plan: profiles.plan, createdAt: profiles.createdAt }).from(profiles).where(eq(profiles.id, userId)),
     isUnlimitedUser(userId),
-    getQuota(userId),
-    getInterviewQuota(userId),
-    getPortfolioQuota(userId),
+    getQuotaWithUsage(userId),
   ]);
-  return { plan: unlimited ? ("unlimited" as const) : (profile?.plan ?? "free"), quotas: { analysis, interview, portfolio } };
+  return { plan: unlimited ? ("unlimited" as const) : (profile?.plan ?? "free"), quota, usage };
 }
 
 /** Everything stored about the user, for the right of access (Decree 13/2023, GDPR art. 15). */

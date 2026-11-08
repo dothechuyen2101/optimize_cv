@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { analyses, interviewSessions, interviewTurns, jobDescriptions, resumeVersions } from "@/db/schema";
 import type { Locale } from "@/i18n/config";
@@ -9,25 +9,10 @@ import type { Job } from "@/lib/ai/schemas/job";
 import type { Resume } from "@/lib/ai/schemas/resume";
 import type { InterviewSettings, TranscriptEntry } from "@/lib/ai/steps/interview";
 import { isUuid } from "@/lib/analysis/service";
-import { monthlyLimit } from "@/lib/billing/limits";
-import { hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
-
-type Db = ReturnType<typeof getDb>;
-type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+import { lockQuota, quotaFor } from "@/lib/billing/limits";
+import { hasQuotaLeft, type QuotaStatus } from "@/lib/billing/quota";
 
 // Every function takes the signed-in user's id and scopes its queries to it.
-
-async function interviewQuotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [{ used }] = await db
-    .select({ used: count() })
-    .from(interviewSessions)
-    .where(and(eq(interviewSessions.userId, userId), gte(interviewSessions.createdAt, quotaWindowStart(now))));
-  return { used, limit: await monthlyLimit(db, userId, "interview") };
-}
-
-export function getInterviewQuota(userId: string): Promise<QuotaStatus> {
-  return interviewQuotaFor(getDb(), userId);
-}
 
 /** Creates a session on the user's own analysis if they have quota left; atomic per user like analyses. */
 export function createInterviewSession(
@@ -37,13 +22,13 @@ export function createInterviewSession(
 ): Promise<{ id: string } | { quota: QuotaStatus } | null> {
   if (!isUuid(analysisId)) return Promise.resolve(null);
   return getDb().transaction(async (tx) => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`interview:${userId}`}))`);
+    await lockQuota(tx, userId);
     const [owned] = await tx
       .select({ id: analyses.id })
       .from(analyses)
       .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
     if (!owned) return null;
-    const quota = await interviewQuotaFor(tx, userId);
+    const quota = await quotaFor(tx, userId);
     if (!hasQuotaLeft(quota)) return { quota };
     const [row] = await tx
       .insert(interviewSessions)

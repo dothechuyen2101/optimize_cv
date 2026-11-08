@@ -3,8 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CvEditor } from "@/components/cv/cv-editor";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { getQuota } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
+import { getQuota } from "@/lib/billing/limits";
 import { loadCvExport } from "@/lib/export/service";
 
 async function RevisedCv({ params }: { params: PageProps<"/[lang]/analyses/[id]/cv">["params"] }) {

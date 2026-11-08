@@ -1,40 +1,18 @@
 import "server-only";
-import { and, count, desc, eq, gt, gte, or, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { analyses, jobDescriptions, portfolioReviews } from "@/db/schema";
 import { PORTFOLIO_REVIEW_PROMPT } from "@/lib/ai/prompts/portfolio-review";
 import type { PortfolioReview } from "@/lib/ai/schemas/portfolio";
 import { isUuid } from "@/lib/analysis/service";
-import { monthlyLimit } from "@/lib/billing/limits";
-import { STALE_RUN_MS, hasQuotaLeft, quotaWindowStart, type QuotaStatus } from "@/lib/billing/quota";
+import { lockQuota, quotaFor } from "@/lib/billing/limits";
+import { hasQuotaLeft, type QuotaStatus } from "@/lib/billing/quota";
 
-type Db = ReturnType<typeof getDb>;
-type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 export type PortfolioInputs = (typeof portfolioReviews.$inferSelect)["sources"];
 
 // Every function takes the signed-in user's id and scopes its queries to it.
-// Like analyses, failed reviews don't count against quota; crashed ones stop counting after a while.
-
-async function portfolioQuotaFor(db: Db | Tx, userId: string, now = new Date()): Promise<QuotaStatus> {
-  const [{ used }] = await db
-    .select({ used: count() })
-    .from(portfolioReviews)
-    .where(
-      and(
-        eq(portfolioReviews.userId, userId),
-        gte(portfolioReviews.createdAt, quotaWindowStart(now)),
-        or(
-          eq(portfolioReviews.status, "completed"),
-          and(eq(portfolioReviews.status, "running"), gt(portfolioReviews.createdAt, new Date(now.getTime() - STALE_RUN_MS))),
-        ),
-      ),
-    );
-  return { used, limit: await monthlyLimit(db, userId, "portfolio") };
-}
-
-export function getPortfolioQuota(userId: string): Promise<QuotaStatus> {
-  return portfolioQuotaFor(getDb(), userId);
-}
+// Reviews share the monthly quota with analyses and interviews (see lib/billing/limits.ts):
+// failed ones don't count, crashed ones stop counting after a while.
 
 /** Creates a running review on the user's own analysis if they have quota left; null if the analysis isn't theirs. */
 export function reservePortfolioReview(
@@ -44,13 +22,13 @@ export function reservePortfolioReview(
 ): Promise<{ id: string } | { quota: QuotaStatus } | null> {
   if (!isUuid(analysisId)) return Promise.resolve(null);
   return getDb().transaction(async (tx) => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`portfolio:${userId}`}))`);
+    await lockQuota(tx, userId);
     const [owned] = await tx
       .select({ id: analyses.id })
       .from(analyses)
       .where(and(eq(analyses.id, analysisId), eq(analyses.userId, userId), eq(analyses.status, "completed")));
     if (!owned) return null;
-    const quota = await portfolioQuotaFor(tx, userId);
+    const quota = await quotaFor(tx, userId);
     if (!hasQuotaLeft(quota)) return { quota };
     const [row] = await tx
       .insert(portfolioReviews)

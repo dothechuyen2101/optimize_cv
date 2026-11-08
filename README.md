@@ -16,11 +16,11 @@ Platform giúp ứng viên nhận được lời mời phỏng vấn: AI đọc 
 | Đánh giá lại CV đã sửa: chấm lại điểm ATS miễn phí, hoặc phân tích lại bằng AI (trừ 1 lượt) kèm so sánh điểm trước/sau | Xong |
 | JD đã lưu: chọn lại JD cũ khi phân tích, upload CV sửa bằng Word với cùng JD và so sánh với lần trước | Xong |
 | Đọc CV chính xác: dùng lớp text của PDF, đối chiếu từng trường, dùng model mạnh cho CV dạng ảnh | Xong |
-| Quota gói free: 3 lượt/tháng (UTC) | Xong |
+| Quota gói free: 1 lượt/tháng (UTC), dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio | Xong |
 | Cache: JD dùng chung theo hash, CV theo hash file, cả lần phân tích khi trùng đầu vào | Xong |
 | Phân tích role: giải mã JD, yêu cầu bắt buộc/ưu tiên, vòng phỏng vấn, câu hỏi luyện tập (miễn phí, 1 lần mỗi phân tích CV) | Xong |
-| Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (free 2 buổi/tháng) | Xong |
-| Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (free 1 lần/tháng) | Xong |
+| Luyện phỏng vấn bằng chat: người phỏng vấn AI hỏi và hỏi vặn, nhận xét từng câu, chấm điểm cuối buổi (trừ lượt tháng dùng chung) | Xong |
+| Review portfolio: GitHub, website/Behance, file PDF, đánh giá theo JD (trừ lượt tháng dùng chung) | Xong |
 | Dự án từ GitHub: AI chọn repo hợp JD, viết thành mục dự án, người dùng duyệt rồi đưa vào CV mới (miễn phí, 1 lần mỗi phân tích) | Xong |
 | Trang Tài khoản: lượt dùng tháng này, tải toàn bộ dữ liệu (JSON), xoá tài khoản và dữ liệu (Nghị định 13, GDPR) | Xong |
 | Giới hạn tần suất gọi AI: 40 lần / 10 phút mỗi user | Xong |
@@ -80,6 +80,7 @@ Host kết nối trực tiếp `db.<project>.supabase.co` chỉ có IPv6. Mạng
 `POST /api/analyze` yêu cầu đăng nhập, nhận file CV và text JD, rồi stream tiến độ về client dạng NDJSON. Trước khi gọi AI:
 - Nếu đã có kết quả cho đúng file, đúng JD, cùng thị trường, cùng ngôn ngữ và cùng phiên bản prompt, route trả ngay kết quả đó, không tính quota.
 - Nếu chưa, route giữ chỗ quota bằng một dòng `analyses` ở trạng thái `running`, trong transaction có khoá theo người dùng.
+- Quota tháng dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio (gói free: 1 lượt, [src/lib/billing/quota.ts](src/lib/billing/quota.ts)). [src/lib/billing/limits.ts](src/lib/billing/limits.ts) đếm cả ba bảng, và cả ba chỗ giữ lượt dùng chung một khoá `quota:<user id>`, nên hai request song song, kể cả khác tính năng, không vượt quota.
 
 Xong thì client chuyển sang `/[lang]/analyses/[id]`. Pipeline gồm:
 
@@ -168,7 +169,7 @@ Từ trang kết quả phân tích có hai hướng tiếp theo, cả hai dùng 
   - redirect được xử lý thủ công và kiểm tra lại ở từng bước;
   - giới hạn 10 giây và 1.5 MB mỗi trang.
 
-Quota: free 1 lần/tháng. Lần thất bại không tính, kể cả khi không đọc được nguồn nào (khi đó không gọi AI).
+Quota: dùng chung lượt tháng với phân tích CV và luyện phỏng vấn. Lần thất bại không tính, kể cả khi không đọc được nguồn nào (khi đó không gọi AI).
 
 ### Dự án từ GitHub (CV mới từ CV cũ + GitHub)
 
@@ -199,7 +200,7 @@ Miễn phí, một lần cho mỗi bản phân tích (giống phân tích role);
 
 ### Tài khoản, dữ liệu cá nhân và giới hạn
 
-- `/[lang]/account` hiển thị gói và lượt dùng tháng này của từng tính năng.
+- `/[lang]/account` hiển thị gói, số lượt đã dùng trên quota chung tháng này và số lần dùng của từng tính năng.
 - `GET /api/account/export` tải về mọi dữ liệu đang lưu về user dưới dạng JSON: CV đã đọc, JD, kết quả phân tích, lựa chọn gợi ý, chỗ sửa tay, phân tích role, các buổi phỏng vấn và review portfolio.
 - Xoá tài khoản: người dùng phải gõ đúng email của mình, và server kiểm tra lại.
   - Server xoá user trong `auth.users`. Mọi bảng của user nối với `profiles` bằng `ON DELETE CASCADE` nên bị xoá theo.
@@ -208,7 +209,7 @@ Miễn phí, một lần cho mỗi bản phân tích (giống phân tích role);
 - Rate limit ([src/lib/billing/rate-limit.ts](src/lib/billing/rate-limit.ts)): mỗi route gọi AI từ chối khi user đã có 40 lần gọi trong 10 phút, đếm từ `ai_usage`, trả mã `too_many_requests`.
   - Mốc thời gian tính bằng `now()` của database, cùng đồng hồ với `created_at`. Đồng hồ máy chủ app có thể lệch: một máy dev từng lệch 82 giây.
   - Khi phân tích CV, việc trả lại kết quả đã cache không bị chặn.
-- Tài khoản không giới hạn ([src/lib/billing/limits.ts](src/lib/billing/limits.ts)): email trong biến `UNLIMITED_EMAILS` (cách nhau bằng dấu phẩy, không phân biệt hoa thường) không bị trừ quota tháng của cả 3 tính năng và không bị rate limit.
+- Tài khoản không giới hạn ([src/lib/billing/limits.ts](src/lib/billing/limits.ts)): email trong biến `UNLIMITED_EMAILS` (cách nhau bằng dấu phẩy, không phân biệt hoa thường) không bị giới hạn quota tháng và không bị rate limit.
   - Chỉ tính khi email đã xác nhận (`auth.users.email_confirmed_at`), nên người đăng ký bằng email của người khác không được hưởng. Supabase chỉ đổi email của tài khoản sau khi email mới được xác nhận.
   - Trang Tài khoản hiện gói "Không giới hạn (tài khoản nội bộ)". Đổi danh sách thì phải redeploy để có hiệu lực.
 - Mỗi lần tạo Supabase client phía server đều gọi `connection()` trước, vì Supabase Auth gọi `Date.now()` khi kiểm tra token. Nếu không, Next ghi lỗi "unstable value Date.now()" khi prerender mọi trang cần đăng nhập.

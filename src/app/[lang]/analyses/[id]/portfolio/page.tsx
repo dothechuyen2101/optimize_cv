@@ -5,7 +5,8 @@ import { PortfolioForm } from "@/components/portfolio/portfolio-form";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getAnalysisReport } from "@/lib/analysis/service";
 import { getSessionUser } from "@/lib/auth/session";
-import { getPortfolioQuota, listPortfolioReviews } from "@/lib/portfolio/service";
+import { getQuota } from "@/lib/billing/limits";
+import { listPortfolioReviews } from "@/lib/portfolio/service";
 
 async function Setup({ params }: { params: PageProps<"/[lang]/analyses/[id]/portfolio">["params"] }) {
   const { id } = await params;
@@ -16,7 +17,7 @@ async function Setup({ params }: { params: PageProps<"/[lang]/analyses/[id]/port
   if (!user) redirect(`/${locale}/login?next=/${locale}/analyses/${id}/portfolio`);
   const [found, quota, previous] = await Promise.all([
     getAnalysisReport(user.id, id),
-    getPortfolioQuota(user.id),
+    getQuota(user.id),
     listPortfolioReviews(user.id, id),
   ]);
   if (!found) notFound();

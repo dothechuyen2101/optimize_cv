@@ -6,7 +6,8 @@ import { format, type Locale } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import type { Dictionary } from "@/i18n/types";
 import { getSessionUser } from "@/lib/auth/session";
-import { getInterviewQuota, listInterviews } from "@/lib/interview/service";
+import { getQuota } from "@/lib/billing/limits";
+import { listInterviews } from "@/lib/interview/service";
 
 const SCORE_STYLE = {
   success: "bg-success-soft text-success",
@@ -17,7 +18,7 @@ const SCORE_STYLE = {
 async function InterviewList({ locale, dict }: { locale: Locale; dict: Dictionary["interview"] }) {
   const user = await getSessionUser();
   if (!user) redirect(`/${locale}/login?next=/${locale}/interviews`);
-  const [items, quota] = await Promise.all([listInterviews(user.id), getInterviewQuota(user.id)]);
+  const [items, quota] = await Promise.all([listInterviews(user.id), getQuota(user.id)]);
   const date = new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-GB", {
     dateStyle: "medium",
     timeStyle: "short",

@@ -22,7 +22,7 @@
     },
     "signup": {
       "title": "Tạo tài khoản",
-      "subtitle": "Miễn phí 3 lượt phân tích mỗi tháng, không cần thẻ thanh toán.",
+      "subtitle": "Miễn phí 1 lượt mỗi tháng, không cần thẻ thanh toán.",
       "submit": "Tạo tài khoản"
     },
     "forgot": {
@@ -64,7 +64,7 @@
   "history": {
     "title": "Lịch sử phân tích",
     "subtitle": "Các lần phân tích CV của bạn, mới nhất ở trên.",
-    "quota": "Tháng này đã dùng {used}/{limit} lượt miễn phí.",
+    "quota": "Tháng này đã dùng {used}/{limit} lượt miễn phí, dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio.",
     "empty": "Bạn chưa có lần phân tích nào.",
     "start": "Phân tích CV đầu tiên",
     "newAnalysis": "Phân tích mới",
@@ -89,7 +89,7 @@
     "secondaryCta": "Xem cách hoạt động",
     "ctaNote": "Hỗ trợ CV tiếng Việt và tiếng Anh, định dạng PDF hoặc DOCX",
     "trust": [
-      "Miễn phí 3 lượt mỗi tháng",
+      "Miễn phí 1 lượt mỗi tháng",
       "Không bịa thêm kinh nghiệm",
       "Không cần thẻ"
     ],
@@ -178,7 +178,7 @@
       }
     ],
     "finalTitle": "Sẵn sàng cho buổi phỏng vấn tiếp theo?",
-    "finalBody": "Bắt đầu với 3 lượt phân tích miễn phí mỗi tháng. Không cần thẻ.",
+    "finalBody": "Bắt đầu với 1 lượt miễn phí mỗi tháng. Không cần thẻ.",
     "finalCta": "Bắt đầu miễn phí"
   },
   "analyze": {
@@ -201,7 +201,7 @@
     "githubInvalid": "Link GitHub không hợp lệ. Nhập username hoặc link dạng https://github.com/username.",
     "submit": "Phân tích",
     "submitting": "Đang phân tích…",
-    "quotaLeft": "Còn {remaining}/{limit} lượt phân tích miễn phí trong tháng này.",
+    "quotaLeft": "Còn {remaining}/{limit} lượt miễn phí trong tháng này, dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio.",
     "opening": "Đang mở kết quả…",
     "progress": {
       "parsing": "Đang đọc CV và JD…",
@@ -218,7 +218,7 @@
       "jd_too_long": "JD quá dài, hãy rút gọn còn phần mô tả công việc chính.",
       "invalid_request": "Yêu cầu không hợp lệ.",
       "unauthorized": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",
-      "quota_exceeded": "Bạn đã dùng hết lượt phân tích miễn phí của tháng này.",
+      "quota_exceeded": "Bạn đã dùng hết lượt miễn phí của tháng này (dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio). Lượt được làm mới vào ngày 1 tháng sau.",
       "too_many_requests": "Bạn đang gửi quá nhiều yêu cầu. Hãy thử lại sau vài phút.",
       "ai_auth": "AI chưa được cấu hình (thiếu hoặc sai ANTHROPIC_API_KEY).",
       "ai_rate_limited": "Hệ thống đang quá tải, vui lòng thử lại sau ít phút.",
@@ -411,7 +411,7 @@
     "listEmpty": "Bạn chưa có buổi luyện phỏng vấn nào. Hãy mở một lần phân tích CV và chọn Luyện phỏng vấn.",
     "listStart": "Mở lịch sử phân tích",
     "active": "Đang diễn ra",
-    "quota": "Tháng này đã dùng {used}/{limit} buổi miễn phí.",
+    "quota": "Tháng này đã dùng {used}/{limit} lượt miễn phí, dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio.",
     "setupTitle": "Luyện phỏng vấn",
     "setupSubtitle": "Người phỏng vấn AI hỏi từng câu dựa trên CV và JD của lần phân tích này, hỏi vặn khi câu trả lời còn chung chung.",
     "back": "Quay lại kết quả phân tích",
@@ -437,7 +437,7 @@
     "feedbackHint": "Tắt nếu muốn trải nghiệm như phỏng vấn thật và chỉ xem nhận xét ở cuối buổi.",
     "start": "Bắt đầu phỏng vấn",
     "starting": "Đang chuẩn bị câu hỏi đầu tiên…",
-    "quotaLeft": "Còn {remaining}/{limit} buổi miễn phí tháng này. Khoảng 6 câu hỏi chính, có câu hỏi vặn.",
+    "quotaLeft": "Trừ 1 lượt (còn {remaining}/{limit} lượt miễn phí tháng này, dùng chung với phân tích CV và review portfolio). Khoảng 6 câu hỏi chính, có câu hỏi vặn.",
     "unlimited": "Khoảng 6 câu hỏi chính, có câu hỏi vặn.",
     "interviewer": "Người phỏng vấn",
     "you": "Bạn",
@@ -468,7 +468,7 @@
     "transcript": "Toàn bộ buổi phỏng vấn",
     "again": "Luyện thêm một buổi",
     "errors": {
-      "quota_exceeded": "Bạn đã dùng hết buổi luyện phỏng vấn miễn phí của tháng này.",
+      "quota_exceeded": "Bạn đã dùng hết lượt miễn phí của tháng này (dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio). Lượt được làm mới vào ngày 1 tháng sau.",
       "interview_over": "Buổi phỏng vấn đã kết thúc.",
       "answer_empty": "Hãy nhập câu trả lời.",
       "answer_too_long": "Câu trả lời quá dài, tối đa 4000 ký tự.",
@@ -503,7 +503,7 @@
     "pdfSelected": "Đã chọn: {name}",
     "submit": "Review portfolio",
     "submitting": "Đang đọc portfolio và đánh giá, thường mất 1–2 phút…",
-    "quotaLeft": "Còn {remaining}/{limit} lần review miễn phí tháng này. Lần không đọc được nguồn nào sẽ không bị trừ.",
+    "quotaLeft": "Trừ 1 lượt (còn {remaining}/{limit} lượt miễn phí tháng này, dùng chung với phân tích CV và luyện phỏng vấn). Lần không đọc được nguồn nào sẽ không bị trừ.",
     "unlimited": "Lần không đọc được nguồn nào sẽ không bị trừ lượt.",
     "previous": "Các lần review trước",
     "resultTitle": "Kết quả review portfolio",
@@ -530,7 +530,7 @@
     "again": "Review lại sau khi sửa",
     "reviewed": "Đã review",
     "errors": {
-      "quota_exceeded": "Bạn đã dùng hết lượt review portfolio miễn phí của tháng này.",
+      "quota_exceeded": "Bạn đã dùng hết lượt miễn phí của tháng này (dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio). Lượt được làm mới vào ngày 1 tháng sau.",
       "no_sources": "Hãy nhập GitHub, ít nhất một link hoặc chọn file PDF.",
       "too_many_urls": "Tối đa 3 link mỗi lần review.",
       "invalid_url": "Có link không hợp lệ.",
@@ -593,6 +593,8 @@
     },
     "usageTitle": "Lượt dùng tháng này",
     "usageNote": "Lượt được tính theo tháng dương lịch (giờ UTC) và làm mới vào ngày 1.",
+    "usageShared": "Mỗi tháng có {limit} lượt miễn phí, dùng chung cho phân tích CV, luyện phỏng vấn và review portfolio.",
+    "quota": "Lượt miễn phí",
     "usage": {
       "analysis": "Phân tích CV",
       "interview": "Luyện phỏng vấn",

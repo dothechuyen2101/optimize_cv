@@ -21,7 +21,7 @@ function Card({ title, children, danger = false }: { title: string; children: Re
 async function Account({ locale, dict, nav }: { locale: Locale; dict: Dictionary["account"]; nav: Dictionary["nav"] }) {
   const user = await getSessionUser();
   if (!user) redirect(`/${locale}/login?next=/${locale}/account`);
-  const { plan, quotas } = await accountOverview(user.id);
+  const { plan, quota, usage } = await accountOverview(user.id);
   const link = "rounded-lg border border-line bg-card px-4 py-2 text-sm font-medium hover:bg-soft";
 
   return (
@@ -30,19 +30,24 @@ async function Account({ locale, dict, nav }: { locale: Locale; dict: Dictionary
         <p className="text-sm">
           {dict.plan}: <span className="font-semibold">{dict.plans[plan]}</span>
         </p>
+        <p className="text-sm">
+          {dict.quota}:{" "}
+          <span className="font-semibold tabular-nums">
+            {quota.limit === null ? dict.unlimited : format(dict.used, { used: quota.used, limit: quota.limit })}
+          </span>
+        </p>
         <dl className="grid gap-2 sm:grid-cols-3">
           {(["analysis", "interview", "portfolio"] as const).map((key) => (
             <div key={key} className="rounded-lg bg-soft px-3 py-2 text-sm">
               <dt className="text-subtle">{dict.usage[key]}</dt>
-              <dd className="mt-0.5 font-semibold tabular-nums">
-                {quotas[key].limit === null
-                  ? dict.unlimited
-                  : format(dict.used, { used: quotas[key].used, limit: quotas[key].limit })}
-              </dd>
+              <dd className="mt-0.5 font-semibold tabular-nums">{usage[key]}</dd>
             </div>
           ))}
         </dl>
-        <p className="text-xs text-subtle">{dict.usageNote}</p>
+        <p className="text-xs text-subtle">
+          {quota.limit !== null && `${format(dict.usageShared, { limit: quota.limit })} `}
+          {dict.usageNote}
+        </p>
       </Card>
 
       <Card title={dict.shortcuts}>
